@@ -2,3 +2,4 @@ deploy
 vendor
 rcc_*
 *.qrc
+ui/uic_*
