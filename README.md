@@ -7,8 +7,8 @@ Work in progress and NOT functional. Use the [Python version](https://github.com
 ## Development
 
 1. Follow the [official steps](https://github.com/therecipe/qt/wiki/Installation) to set up a Go project in **Module Mode**.
-2. Test app using `$ qtdeploy -debug -uic=false -quickcompiler build`
-3. Package for deployment `$ qtdeploy -debug -uic=false -quickcompiler build`
+2. Test app using `$ qtdeploy -debug -uic=false -quickcompiler test`
+3. Package for deployment `$ qtdeploy -uic=false -quickcompiler build`
 
 Important folders:
 
