@@ -2,13 +2,14 @@ package main
 
 import (
     "github.com/therecipe/qt/widgets"
-    "os"
+    "vorta-go/app"
     "vorta-go/models"
     "vorta-go/ui"
 )
 
 func main() {
-    widgets.NewQApplication(len(os.Args), os.Args)
+
+    app.InitApp()
     models.InitDb()
     defer models.DB.Close()
 

@@ -1,17 +1,16 @@
 package models
 
 import (
-	"fmt"
 	"time"
 )
 
 var (
-	sqlAllRepos = "SELECT * FROM repomodel"
+	sqlAllRepos = "SELECT * FROM repomodel ORDER BY url ASC"
 	sqlRepoById = "SELECT * FROM repomodel WHERE id=:id"
 )
 
 type Repo struct {
-	Id uint
+	Id int
 	Url string
 	AddedAt time.Time `db:"added_at"`
 	Encryption string
@@ -22,14 +21,11 @@ type Repo struct {
 	ExtraBorgArguments string `db:"extra_borg_arguments"`
 }
 
-func QueryAllRepos() {
+func QueryAllRepos() []Repo {
 	rr := []Repo{}
 	err := DB.Select(&rr, sqlAllRepos)
 	if err != nil {
 		panic("Error while loading data.")
 	}
-	for _, repo := range rr {
-
-		fmt.Println("url: %s", repo.Url)
-	}
+	return rr
 }
