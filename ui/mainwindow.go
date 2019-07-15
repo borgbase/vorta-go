@@ -30,14 +30,18 @@ func (w *MainWindow) init() {
 		w.ProfileSelector.AddItem(profile.Name, core.NewQVariant1(profile.Id))
 	}
 
+	if app.CurrentProfile == nil {
+		app.CurrentProfile = &pp[0]
+	}
+
 	w.CreateStartBtn.ConnectClicked(w.StartBackup)
 
-	go w.displayLogMessages(app.App.StatusUpdateChannel)
+	go w.displayLogMessages(app.StatusUpdateChannel)
 	w.Show()
 }
 
 func (w *MainWindow) StartBackup(checked bool) {
-	app.App.StatusUpdateChannel <- "Running Borg"
+	app.StatusUpdateChannel <- "Running Borg"
 	b := borg.BorgCommand{SubCommand: "info"}
 	b.Prepare()
 	go b.Run()

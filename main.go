@@ -10,7 +10,7 @@ import (
 func main() {
     app.InitApp()
     app.InitScheduler()
-    models.InitDb(app.App.Appdir.UserData())
+    models.InitDb(app.ConfigDir.UserData())
     defer models.DB.Close()
 
     ui.NewMainWindow(nil)

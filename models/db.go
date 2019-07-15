@@ -11,14 +11,11 @@ var DB *sqlx.DB
 
 func InitDb(dbPath string) {
 	var err error
-	DB, err = sqlx.Open("sqlite3", path.Join(dbPath, "settings.db"))
+	DB, err = sqlx.Connect("sqlite3", path.Join(dbPath, "settings.db"))
+	//TODO: check if DB exists. Insert tables.
 
 	if err != nil {
 		fmt.Println(err)
 		panic("failed to connect database")
-	}
-	err = DB.Ping()
-	if err != nil {
-		panic(err)
 	}
 }

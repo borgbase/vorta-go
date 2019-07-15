@@ -1,6 +1,7 @@
 package models
 
 import (
+	"database/sql"
 	"time"
 )
 
@@ -15,10 +16,10 @@ type Profile struct {
 	Name string
 	AddedAt time.Time `db:"added_at"`
 	RepoId int `db:"repo_id"`
-	SSHKey string `db:"ssh_key"`
+	SSHKey sql.NullString `db:"ssh_key"`
 	Compression string
-	ExcludePatterns string `db:"exclude_patterns"`
-	ExcludeIfPresent string `db:"exclude_if_present"`
+	ExcludePatterns sql.NullString `db:"exclude_patterns"`
+	ExcludeIfPresent sql.NullString `db:"exclude_if_present"`
 
 	ScheduleMode string `db:"schedule_mode"`
 	ScheduleIntervalHours int `db:"schedule_interval_hours"`
@@ -27,7 +28,7 @@ type Profile struct {
 	ScheduleFixedMinute int `db:"schedule_fixed_minute"`
 
 	ValidationOn bool `db:"validation_on"`
-	ValidationWeeks bool `db:"validation_weeks"`
+	ValidationWeeks int `db:"validation_weeks"`
 
 	PruneOn bool `db:"prune_on"`
 	PruneHour int `db:"prune_hour"`
@@ -35,7 +36,7 @@ type Profile struct {
 	PruneWeek int `db:"prune_week"`
 	PruneMonth int `db:"prune_month"`
 	PruneYear int `db:"prune_year"`
-	PruneKeepWithin string `db:"prune_keep_within"`
+	PruneKeepWithin sql.NullString `db:"prune_keep_within"`
 
 	//"{hostname}-{profile_slug}-{now:%Y-%m-%dT%H:%M:%S}"
 	NewArchiveName string `db:"new_archive_name"`

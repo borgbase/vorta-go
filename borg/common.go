@@ -25,7 +25,7 @@ func (c *BorgCommand) Run() {
 	cmd := exec.Command(
 		"/Users/manu/.pyenv/shims/borg",
 		"info", "--debug", "uy5cg8ky@uy5cg8ky.repo.borgbase.com:repo")
-	app.App.CurrentCommand = cmd
+	app.CurrentCommand = cmd
 
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
@@ -34,18 +34,18 @@ func (c *BorgCommand) Run() {
 	scanner := bufio.NewScanner(stderr)
 	go func() {
 		for scanner.Scan() {
-			app.App.StatusUpdateChannel <- scanner.Text()
+			app.StatusUpdateChannel <- scanner.Text()
 		}
 	}()
 
 	if err := cmd.Start(); err != nil {
 		log.Fatal(err)
 	}
-	app.App.StatusUpdateChannel <- "Started Command"
+	app.StatusUpdateChannel <- "Started Command"
 
 	if err := cmd.Wait(); err != nil {
 		log.Fatal(err)
 	}
-	app.App.StatusUpdateChannel <- "Finished Command"
-	app.App.CurrentCommand = nil
+	app.StatusUpdateChannel <- "Finished Command"
+	app.CurrentCommand = nil
 }

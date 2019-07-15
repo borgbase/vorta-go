@@ -6,7 +6,7 @@ import (
 
 func InitScheduler() {
 	c := cron.New()
-	c.AddFunc("*/1 * * * *", func() { App.Log.Info("Every minute") })
+	c.AddFunc("*/1 * * * *", func() { Log.Info("Every minute") })
 	c.Start()
-	App.Log.Info("Started Scheduler.")
+	Log.Info("Started Scheduler.")
 }
