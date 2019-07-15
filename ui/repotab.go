@@ -10,7 +10,9 @@ func (t *RepoTab) init() {
 	t.RepoSelector.AddItem("+ Initialize New Repository", core.NewQVariant1("new"))
 	t.RepoSelector.AddItem("+ Add Existing Repository", core.NewQVariant1("existing"))
 	t.RepoSelector.InsertSeparator(3)
-	for _, repo := range models.QueryAllRepos() {
+	rr := []models.Repo{}
+	models.DB.Select(&rr, models.SqlAllRepos)
+	for _, repo := range rr {
 		t.RepoSelector.AddItem(repo.Url, core.NewQVariant1(repo.Id))
 	}
 

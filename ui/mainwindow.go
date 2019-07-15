@@ -1,8 +1,10 @@
 package ui
 
 import (
+	"github.com/therecipe/qt/core"
 	"vorta-go/app"
 	"vorta-go/borg"
+	"vorta-go/models"
 )
 
 func (w *MainWindow) init() {
@@ -12,16 +14,32 @@ func (w *MainWindow) init() {
 	w.TabWidget.AddTab(NewArchiveTab(w), "Archives")
 	w.TabWidget.AddTab(NewMiscTab(w), "Misc")
 	w.SetWindowTitle("Vorta for Borg Backup")
-	w.Show()
+
+	//# Init profile list
+	//for profile in BackupProfileModel.select():
+	//	self.profileSelector.addItem(profile.name, profile.id)
+	//	self.profileSelector.setCurrentIndex(0)
+	//	self.profileSelector.currentIndexChanged.connect(self.profile_select_action)
+	//	self.profileRenameButton.clicked.connect(self.profile_rename_action)
+	//	self.profileDeleteButton.clicked.connect(self.profile_delete_action)
+	//	self.profileAddButton.clicked.connect(self.profile_add_action)
+
+	pp := []models.Profile{}
+	models.DB.Select(&pp, models.SqlAllProfiles)
+	for _, profile := range pp {
+		w.ProfileSelector.AddItem(profile.Name, core.NewQVariant1(profile.Id))
+	}
 
 	w.CreateStartBtn.ConnectClicked(w.StartBackup)
 
 	go w.displayLogMessages(app.App.StatusUpdateChannel)
+	w.Show()
 }
 
 func (w *MainWindow) StartBackup(checked bool) {
 	app.App.StatusUpdateChannel <- "Running Borg"
 	b := borg.BorgCommand{SubCommand: "info"}
+	b.Prepare()
 	go b.Run()
 }
 

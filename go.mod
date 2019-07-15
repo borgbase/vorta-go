@@ -3,10 +3,12 @@ module vorta-go
 go 1.12
 
 require (
+	github.com/ProtonMail/go-appdir v1.0.0
 	github.com/gopherjs/gopherjs v0.0.0-20190430165422-3e4dfb77656c // indirect
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/mattn/go-sqlite3 v1.10.0
-	github.com/sirupsen/logrus v1.4.2 // indirect
+	github.com/robfig/cron/v3 v3.0.0
+	github.com/sirupsen/logrus v1.4.2
 	github.com/stephenlyu/go-pkg-xmlx v0.0.0-20151201012946-76f54ee73233 // indirect
 	github.com/stephenlyu/goqtuic v0.0.0-20180825180006-53b29b85eb87 // indirect
 	github.com/therecipe/env_darwin_amd64_513 v0.0.0-20190626001412-d8e92e8db4d0 // indirect

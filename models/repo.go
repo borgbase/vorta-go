@@ -5,8 +5,8 @@ import (
 )
 
 var (
-	sqlAllRepos = "SELECT * FROM repomodel ORDER BY url ASC"
-	sqlRepoById = "SELECT * FROM repomodel WHERE id=:id"
+	SqlAllRepos = "SELECT * FROM repomodel ORDER BY url ASC"
+	SqlRepoById = "SELECT * FROM repomodel WHERE id=?"
 )
 
 type Repo struct {
@@ -19,13 +19,4 @@ type Repo struct {
 	TotalSize uint64 `db:"total_size"`
 	TotalUniqueChunks uint64 `db:"total_unique_chunks"`
 	ExtraBorgArguments string `db:"extra_borg_arguments"`
-}
-
-func QueryAllRepos() []Repo {
-	rr := []Repo{}
-	err := DB.Select(&rr, sqlAllRepos)
-	if err != nil {
-		panic("Error while loading data.")
-	}
-	return rr
 }

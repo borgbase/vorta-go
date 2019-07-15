@@ -2,6 +2,7 @@ package borg
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"os/exec"
 
@@ -12,12 +13,18 @@ type BorgCommand struct {
 	SubCommand string
 }
 
-//func (c *BorgCommand) Prepare() {
-//
-//}
+func (c *BorgCommand) Prepare() {
+	path, err := exec.LookPath("borg")
+	if err != nil {
+		log.Fatal("Borg binary not found.")
+	}
+	fmt.Printf("borg is available at %s\n", path)
+}
 
 func (c *BorgCommand) Run() {
-	cmd := exec.Command("borg", "info", "--debug", "uy5cg8ky@uy5cg8ky.repo.borgbase.com:repo")
+	cmd := exec.Command(
+		"/Users/manu/.pyenv/shims/borg",
+		"info", "--debug", "uy5cg8ky@uy5cg8ky.repo.borgbase.com:repo")
 	app.App.CurrentCommand = cmd
 
 	stderr, err := cmd.StderrPipe()

@@ -8,9 +8,9 @@ import (
 )
 
 func main() {
-
     app.InitApp()
-    models.InitDb()
+    app.InitScheduler()
+    models.InitDb(app.App.Appdir.UserData())
     defer models.DB.Close()
 
     ui.NewMainWindow(nil)
