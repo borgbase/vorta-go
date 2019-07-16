@@ -4,3 +4,4 @@ rcc_*
 *.qrc
 ui/uic_*
 darwin/Contents/Resources/borg
+darwin/Contents/Frameworks/

@@ -28,4 +28,4 @@ COPY go.sum .
 RUN go mod download
 COPY . .
 
-RUN cd $HOME/vorta && $GOPATH/bin/qtdeploy -uic=false -quickcompiler -debug build
+RUN cd $HOME/vorta && rm -rf deploy && $GOPATH/bin/qtdeploy -uic=false -quickcompiler -debug build
