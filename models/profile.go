@@ -7,8 +7,9 @@ import (
 
 var (
 	SqlAllProfiles = "SELECT * FROM backupprofilemodel ORDER BY name ASC"
-	SqlProfileById = "SELECT * FROM repomodel WHERE id=?"
-	SqlOneProfile =  "SELECT * FROM repomodel LIMIT 1"
+	SqlProfileById = "SELECT * FROM backupprofilemodel WHERE id=?"
+	SqlOneProfile =  "SELECT * FROM backupprofilemodel LIMIT 1"
+	SqlCountProfiles = "SELECT count(*) from backupprofilemodel"
 )
 
 type Profile struct {
@@ -38,10 +39,71 @@ type Profile struct {
 	PruneYear int `db:"prune_year"`
 	PruneKeepWithin sql.NullString `db:"prune_keep_within"`
 
-	//"{hostname}-{profile_slug}-{now:%Y-%m-%dT%H:%M:%S}"
 	NewArchiveName string `db:"new_archive_name"`
-	//"{hostname}-{profile_slug}-"
 	PrunePrefix string `db:"prune_prefix"`
 	PreBackupCmd string `db:"pre_backup_cmd"`
 	PostBackupCmd string `db:"post_backup_cmd"`
 }
+
+
+var SqlProfileSchema = `
+CREATE TABLE IF NOT EXISTS "backupprofilemodel"
+  (
+     "id"                        INTEGER NOT NULL PRIMARY KEY,
+     "name"                      VARCHAR(255) NOT NULL,
+     "added_at"                  DATETIME NOT NULL,
+     "repo_id"                   INTEGER,
+     "ssh_key"                   VARCHAR(255),
+     "compression"               VARCHAR(255) NOT NULL,
+     "exclude_patterns"          TEXT,
+     "exclude_if_present"        TEXT,
+     "schedule_mode"             VARCHAR(255) NOT NULL,
+     "schedule_interval_hours"   INTEGER NOT NULL,
+     "schedule_interval_minutes" INTEGER NOT NULL,
+     "schedule_fixed_hour"       INTEGER NOT NULL,
+     "schedule_fixed_minute"     INTEGER NOT NULL,
+     "validation_on"             INTEGER NOT NULL,
+     "validation_weeks"          INTEGER NOT NULL,
+     "prune_on"                  INTEGER NOT NULL,
+     "prune_hour"                INTEGER NOT NULL,
+     "prune_day"                 INTEGER NOT NULL,
+     "prune_week"                INTEGER NOT NULL,
+     "prune_month"               INTEGER NOT NULL,
+     "prune_year"                INTEGER NOT NULL,
+     "prune_keep_within"         VARCHAR(255),
+     "new_archive_name"          VARCHAR(255) NOT NULL,
+     "prune_prefix"              VARCHAR(255) NOT NULL,
+     "pre_backup_cmd"            VARCHAR(255) NOT NULL,
+     "post_backup_cmd"           VARCHAR(255) NOT NULL,
+     FOREIGN KEY ("repo_id") REFERENCES "repomodel" ("id")
+  );
+`
+
+var SqlProfileDefaultRow = `
+INSERT INTO "backupprofilemodel"
+VALUES      (1,
+             'Default',
+             (DATETIME('now')),
+             14,
+             NULL,
+             'zstd,3',
+             '*/.DS_Store',
+             '.nobackup',
+             'off',
+             1,
+             24,
+             17,
+             54,
+             1,
+             3,
+             0,
+             2,
+             7,
+             4,
+             6,
+             2,
+             '',
+             '{hostname}__{profile_slug}-{now:%Y-%m-%dT%H:%M:%S}',
+             '{hostname}-{profile_slug}-',
+             '',
+             '')`

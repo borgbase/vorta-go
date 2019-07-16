@@ -12,7 +12,20 @@ var DB *sqlx.DB
 func InitDb(dbPath string) {
 	var err error
 	DB, err = sqlx.Connect("sqlite3", path.Join(dbPath, "settings.db"))
-	//TODO: check if DB exists. Insert tables.
+
+	DB.MustExec(SqlArchiveSchema)
+	DB.MustExec(SqlEvenLogSchema)
+	DB.MustExec(SqlProfileSchema)
+	DB.MustExec(SqlRepoSchema)
+	DB.MustExec(SqlSchemaVersionSchema)
+	DB.MustExec(SqlSettingsSchema)
+	DB.MustExec(SqlSourceDirSchema)
+
+	var nProfiles int
+	DB.Get(&nProfiles, SqlCountProfiles)
+	if nProfiles == 0 {
+		DB.MustExec(SqlProfileDefaultRow)
+	}
 
 	if err != nil {
 		fmt.Println(err)
