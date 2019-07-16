@@ -26,9 +26,7 @@ RUN apt-get -qq update && apt-get --no-install-recommends -qq -y install ca-cert
 RUN apt-get -qq update && apt-get --no-install-recommends -qq -y install build-essential libglib2.0-dev libglu1-mesa-dev libpulse-dev  && apt-get -qq clean
 RUN apt-get -qq update && apt-get --no-install-recommends -qq -y install libqt*5-dev qt*5-dev qt*5-doc-html && apt-get -qq clean
 
-RUN $GOPATH/bin/qtsetup prep
-RUN $GOPATH/bin/qtsetup check
-RUN $GOPATH/bin/qtsetup generate
+RUN $GOPATH/bin/qtsetup
 
 COPY . $HOME/src
 RUN cd $HOME/src && $GOPATH/bin/qtdeploy -uic=false -quickcompiler -debug build

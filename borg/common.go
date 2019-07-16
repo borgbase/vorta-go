@@ -2,26 +2,45 @@ package borg
 
 import (
 	"bufio"
-	"fmt"
+	"errors"
 	"log"
 	"os/exec"
+	"golang.org/x/sync/semaphore"
+	"vorta-go/models"
 
 	"vorta-go/app"
 )
 
-type BorgCommand struct {
+var borgProcessSlot = semaphore.NewWeighted(1)
+
+type BorgRun struct {
+	Bin *BorgBin
 	SubCommand string
+	SubCommandArgs []string
+	ExtraBorgArgs []string
+	Repo *models.Repo
+	Profile *models.Profile
 }
 
-func (c *BorgCommand) Prepare() {
-	path, err := exec.LookPath("borg")
+func (r *BorgRun) Prepare() error {
+
+	// checks: binary available,
+	var err error
+	r.Bin, err = NewBorgBin()
 	if err != nil {
-		log.Fatal("Borg binary not found.")
+		return err
 	}
-	fmt.Printf("borg is available at %s\n", path)
+
+	// backup in progress
+	if !borgProcessSlot.TryAcquire(1) {
+		return errors.New("Backup is already in progress.")
+	}
+
+	return nil
 }
 
-func (c *BorgCommand) Run() {
+
+func (r *BorgRun) Run() {
 	cmd := exec.Command(
 		"/Users/manu/.pyenv/shims/borg",
 		"info", "--debug", "uy5cg8ky@uy5cg8ky.repo.borgbase.com:repo")

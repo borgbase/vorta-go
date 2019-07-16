@@ -42,7 +42,7 @@ func (w *MainWindow) init() {
 
 func (w *MainWindow) StartBackup(checked bool) {
 	app.StatusUpdateChannel <- "Running Borg"
-	b := borg.BorgCommand{SubCommand: "info"}
+	b := borg.BorgRun{SubCommand: "info"}
 	b.Prepare()
 	go b.Run()
 }
