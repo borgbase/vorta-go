@@ -20,6 +20,12 @@ RUN $GOPATH/bin/qtsetup prep
 RUN $GOPATH/bin/qtsetup check
 RUN $GOPATH/bin/qtsetup generate
 
-COPY . $HOME/vorta
-RUN cd $HOME/vorta && go mod vendor
+RUN mkdir $HOME/vorta
+WORKDIR $HOME/vorta
+COPY go.mod .
+COPY go.sum .
+
+RUN go mod download
+COPY . .
+
 RUN cd $HOME/vorta && $GOPATH/bin/qtdeploy -uic=false -quickcompiler -debug build

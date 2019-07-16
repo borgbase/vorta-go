@@ -9,8 +9,6 @@ require (
 	github.com/mattn/go-sqlite3 v1.10.0
 	github.com/robfig/cron/v3 v3.0.0
 	github.com/sirupsen/logrus v1.4.2
-	github.com/stephenlyu/go-pkg-xmlx v0.0.0-20151201012946-76f54ee73233 // indirect
-	github.com/stephenlyu/goqtuic v0.0.0-20180825180006-53b29b85eb87 // indirect
 	github.com/therecipe/env_darwin_amd64_513 v0.0.0-20190626001412-d8e92e8db4d0 // indirect
 	github.com/therecipe/qt v0.0.0-20190628021130-a9acd1ab63c1
 	github.com/therecipe/qt/internal/binding/files/docs v0.0.0-20190628021130-a9acd1ab63c1 // indirect
@@ -25,7 +23,9 @@ require (
 	github.com/therecipe/qt/internal/binding/files/docs/5.9.0 v0.0.0-20190628021130-a9acd1ab63c1 // indirect
 	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 // indirect
 	golang.org/x/net v0.0.0-20190628185345-da137c7871d7 // indirect
+	golang.org/x/sync v0.0.0-20190423024810-112230192c58
 	golang.org/x/sys v0.0.0-20190712062909-fae7ac547cb7 // indirect
 	golang.org/x/text v0.3.2 // indirect
-	golang.org/x/tools v0.0.0-20190712213246-8b927904ee0d // indirect
+	golang.org/x/tools v0.0.0-20190716021316-fefcef05abb1 // indirect
+
 )

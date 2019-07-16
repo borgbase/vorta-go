@@ -1,9 +1,13 @@
 package borg
 
 import (
-	"bufio"
+	"encoding/json"
+	"io"
+
 	"errors"
+	"fmt"
 	"log"
+	"os"
 	"os/exec"
 	"golang.org/x/sync/semaphore"
 	"vorta-go/models"
@@ -11,15 +15,24 @@ import (
 	"vorta-go/app"
 )
 
+
 var borgProcessSlot = semaphore.NewWeighted(1)
 
 type BorgRun struct {
 	Bin *BorgBin
+	CommonBorgArgs []string
 	SubCommand string
 	SubCommandArgs []string
-	ExtraBorgArgs []string
 	Repo *models.Repo
 	Profile *models.Profile
+}
+
+type BorgLogMessage struct {
+	LogType string `json:"type"`
+	Message string `json:"message"`
+	Levelname string `json:"levelname"`
+	Name string `json:"name"`
+	Time float32 `json:"time"`
 }
 
 func (r *BorgRun) Prepare() error {
@@ -36,24 +49,44 @@ func (r *BorgRun) Prepare() error {
 		return errors.New("Backup is already in progress.")
 	}
 
+	r.CommonBorgArgs = append(r.CommonBorgArgs, "--info", "--log-json")
 	return nil
 }
 
 
 func (r *BorgRun) Run() {
+	mergedArgs := append(r.CommonBorgArgs, r.SubCommand)
+	mergedArgs = append(mergedArgs, r.SubCommandArgs...)
 	cmd := exec.Command(
-		"/Users/manu/.pyenv/shims/borg",
-		"info", "--debug", "uy5cg8ky@uy5cg8ky.repo.borgbase.com:repo")
-	app.CurrentCommand = cmd
+		r.Bin.Path,
+		mergedArgs...
+		)
+	//app.CurrentCommand = cmd
+	cmd.Env = os.Environ()
+	cmd.Env = append(cmd.Env, "BORG_PASSPHRASE=xxx")
 
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
 		log.Fatal(err)
 	}
-	scanner := bufio.NewScanner(stderr)
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	scanner := json.NewDecoder(stderr)
 	go func() {
-		for scanner.Scan() {
-			app.StatusUpdateChannel <- scanner.Text()
+		l := BorgLogMessage{}
+		for {
+			err = scanner.Decode(&l)
+			if err == io.EOF {
+				return
+			}
+			if err != nil {
+				app.Log.Error(err)
+			}
+			app.StatusUpdateChannel <- l.Message
+			app.Log.Info(l.Message)
 		}
 	}()
 
@@ -62,9 +95,16 @@ func (r *BorgRun) Run() {
 	}
 	app.StatusUpdateChannel <- "Started Command"
 
+	var result map[string]interface{}
+	if err := json.NewDecoder(stdout).Decode(&result); err != nil {
+		log.Fatal(err)
+	}
+
 	if err := cmd.Wait(); err != nil {
 		log.Fatal(err)
 	}
 	app.StatusUpdateChannel <- "Finished Command"
-	app.CurrentCommand = nil
+	borgProcessSlot.Release(1)
+
+	fmt.Println(result)
 }

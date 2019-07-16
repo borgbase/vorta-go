@@ -42,8 +42,17 @@ func (w *MainWindow) init() {
 
 func (w *MainWindow) StartBackup(checked bool) {
 	app.StatusUpdateChannel <- "Running Borg"
-	b := borg.BorgRun{SubCommand: "info"}
-	b.Prepare()
+
+	p := models.Profile{}
+	models.DB.Get(&p, models.SqlProfileById, 1)
+
+	r := models.Repo{}
+	models.DB.Get(&r, models.SqlRepoById, 14)
+
+	b, err := borg.NewInfoRun(&p, &r)
+	if err != nil {
+		app.Log.Error(err)
+	}
 	go b.Run()
 }
 
