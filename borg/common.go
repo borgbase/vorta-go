@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/exec"
 	"golang.org/x/sync/semaphore"
+	"github.com/zalando/go-keyring"
 	"vorta-go/models"
 
 	"vorta-go/app"
@@ -62,9 +63,14 @@ func (r *BorgRun) Run() {
 		r.Bin.Path,
 		mergedArgs...
 		)
-	//app.CurrentCommand = cmd
+
+	secret, err := keyring.Get("vorta-repo", r.Repo.Url)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	cmd.Env = os.Environ()
-	cmd.Env = append(cmd.Env, "BORG_PASSPHRASE=xxx")
+	cmd.Env = append(cmd.Env, fmt.Sprintf("BORG_PASSPHRASE=%s", secret))
 
 	stderr, err := cmd.StderrPipe()
 	if err != nil {

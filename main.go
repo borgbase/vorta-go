@@ -17,10 +17,9 @@ func main() {
     defer models.DB.Close()
 
     w := ui.NewMainWindow(nil)
-    w.AddTabs()
-
     go w.RunUIEventHandler(app.AppChan)
     go app.RunAppEventHandler(ui.MainWindowChan)
+    w.AddTabs()
 
     widgets.QApplication_Exec()
 }

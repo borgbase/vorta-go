@@ -20,30 +20,28 @@ var (
 	currentProfile *models.Profile
 	Tabs           MainWindowTabs
 	MainWindowChan chan utils.VEvent
+	currentRepo    *models.Repo
 )
 
 func (w *MainWindow) init() {
 	w.SetWindowTitle("Vorta for Borg Backup")
-	//# Init profile list
-	//for profile in BackupProfileModel.select():
-	//	self.profileSelector.addItem(profile.name, profile.id)
-	//	self.profileSelector.setCurrentIndex(0)
-	//	self.profileSelector.currentIndexChanged.connect(self.profile_select_action)
-	//	self.profileRenameButton.clicked.connect(self.profile_rename_action)
-	//	self.profileDeleteButton.clicked.connect(self.profile_delete_action)
-	//	self.profileAddButton.clicked.connect(self.profile_add_action)
 
 	pp := []models.Profile{}
 	models.DB.Select(&pp, models.SqlAllProfiles)
 	for _, profile := range pp {
 		w.ProfileSelector.AddItem(profile.Name, core.NewQVariant1(profile.Id))
 	}
+
 	// Set currentProfile and currentRepo
 	currentProfile = &pp[0]
-	models.DB.Get(currentRepo, models.SqlRepoById, pp[0].RepoId)
+	currentRepo = &models.Repo{}
+	err := models.DB.Get(currentRepo, models.SqlRepoById, pp[0].RepoId)
+	app.Log.Error(err)
+	app.Log.Info("Running backup for ", currentRepo.Url)
 
 	w.CreateStartBtn.ConnectClicked(w.StartBackup)
 	w.ProfileSelector.ConnectCurrentIndexChanged(w.profileSelectorChanged)
+	w.ConnectClose(func() bool {w.Close(); return true})
 	w.Show()
 	MainWindowChan = make(chan utils.VEvent)
 }
@@ -62,18 +60,22 @@ func (w *MainWindow) AddTabs() {
 	w.TabWidget.AddTab(Tabs.ScheduleTab, "Schedule")
 	w.TabWidget.AddTab(Tabs.ArchiveTab, "Archives")
 	w.TabWidget.AddTab(Tabs.MiscTab, "Misc")
+
+	Tabs.RepoTab.Populate()
 }
 
 func (w *MainWindow) profileSelectorChanged(ix int) {
-	id := w.ProfileSelector.ItemData(ix, int(core.Qt__UserRole))
+	id := w.ProfileSelector.ItemData(ix, int(core.Qt__UserRole)).ToInt(nil)
 	models.DB.Get(currentProfile, models.SqlProfileById, id)
 	models.DB.Get(currentRepo, models.SqlRepoById, currentProfile.RepoId)
-	Tabs.RepoTab.Update()
+	app.Log.Error(currentRepo.Url, id)
+	Tabs.RepoTab.Populate()
 }
 
 func (w *MainWindow) StartBackup(checked bool) {
 	MainWindowChan <- utils.VEvent{Topic: "StatusUpdate", Data: "Started Backup"}
 
+	app.Log.Info("Running backup for ", currentRepo.Url)
 	b, err := borg.NewInfoRun(currentProfile, currentRepo)
 	if err != nil {
 		app.Log.Error(err)
@@ -88,14 +90,18 @@ func (w *MainWindow) displayLogMessage(m string) {
 
 func (w *MainWindow) RunUIEventHandler(appChan chan utils.VEvent) {
 	for e := range MainWindowChan {
-		app.Log.Info("Processing event")
 		switch e.Topic {
 		case "StatusUpdate":
 			w.displayLogMessage(e.Data)
 		case "ChangeRepo":
 			app.Log.Info("Repo changed")
+			models.DB.Get(currentRepo, models.SqlRepoById, e.Data)
+			Tabs.RepoTab.Populate()
+			// TODO: Save changed repoId to profile
 		case "EventForApp":
 			appChan <- e
+		case "OpenMainWindow":
+			w.Show()
 		default:
 			app.Log.Info("Unhandled UI Event")
 		}

@@ -17,8 +17,6 @@ var availableCompression = map[string]string{
 	"No Compression": "none",
 }
 
-var currentRepo *models.Repo
-
 func (t *RepoTab) init() {
 
 	// Populate available Repos
@@ -56,17 +54,17 @@ func (t *RepoTab) setStats() {
 	t.SizeOriginal.SetText(humanize.Bytes(uint64(currentRepo.TotalSize.Int64)))
 }
 
-func (t *RepoTab) Update() {
+func (t *RepoTab) Populate() {
 	ix := t.RepoSelector.FindData(core.NewQVariant1(currentRepo.Id), int(core.Qt__UserRole), core.Qt__MatchExactly)
+	app.Log.Info("Need repo at index ", ix)
 	t.RepoSelector.SetCurrentIndex(ix)
+	t.setStats()
+	t.setCompression()
 }
 
 func (t *RepoTab) repoSelectorChanged(newIndex int) {
-	// Save new repo to profile
-	// Set global currentRepo
-	// Repaint stuff in other tabs.
 	app.Log.Info("Repo changed.")
-	MainWindowChan <- utils.VEvent{Topic: "ChangeRepo", Data: "ii"}
-	//t.setStats()
-	//t.setCompression()
+	id := t.RepoSelector.CurrentData(int(core.Qt__UserRole))
+	MainWindowChan <- utils.VEvent{Topic: "ChangeRepo", Data: id.ToString()}
+
 }

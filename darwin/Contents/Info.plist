@@ -9,7 +9,7 @@
 	<key>CFBundleIconFile</key>
 	<string>vorta-icon.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.borgbase.goclient.macos</string>
+	<string>com.borgbase.client.macos</string>
 	<key>CFBundleName</key>
 	<string>Vorta</string>
 	<key>CFBundlePackageType</key>

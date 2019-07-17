@@ -25,10 +25,10 @@ CREATE TABLE IF NOT EXISTS "repomodel"
   ) `
 
 type Repo struct {
-	Id int
-	Url string
+	Id int `db:"id"`
+	Url string `db:"url"`
 	AddedAt time.Time `db:"added_at"`
-	Encryption sql.NullString
+	Encryption sql.NullString `db:"encryption"`
 	UniqueSize sql.NullInt64 `db:"unique_size"`
 	UniqueCsize sql.NullInt64 `db:"unique_csize"`
 	TotalSize sql.NullInt64 `db:"total_size"`

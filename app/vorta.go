@@ -14,9 +14,11 @@ var (
 	AppChan   chan utils.VEvent
 	ConfigDir appdir.Dirs
 	Log       *logrus.Logger
+	QtApp	  *widgets.QApplication
 )
 
 func InitApp() {
+	// Find and create required folders (settings and logs)
 	ConfigDir = appdir.New("Vorta")
 
 	requiredFolders := []string{ConfigDir.UserLogs(), ConfigDir.UserData()}
@@ -29,11 +31,14 @@ func InitApp() {
 		}
 	}
 
+	// Set up logging
 	Log = logrus.New()
 	Formatter := new(logrus.TextFormatter)
 	Formatter.TimestampFormat = "2006-01-02 15:04:05"
 	Formatter.FullTimestamp = true
 	Log.SetFormatter(Formatter)
+	// TODO: make cli argument
+	Log.SetLevel(logrus.DebugLevel)
 
 	logFile, err := os.OpenFile(path.Join(ConfigDir.UserLogs(), "vorta-go.log"), os.O_WRONLY | os.O_CREATE, 0755)
 	if err != nil {
@@ -41,15 +46,23 @@ func InitApp() {
 	}
 	mw := io.MultiWriter(os.Stdout, logFile)
 	Log.SetOutput(mw)
-	Log.Info("Logging Ready.")
 
-	widgets.NewQApplication(len(os.Args), os.Args)
+	// Set up Qt App
+	QtApp = widgets.NewQApplication(len(os.Args), os.Args)
+	QtApp.SetQuitOnLastWindowClosed(false)
 
 	InitTray()
 }
 
 func RunAppEventHandler(UIChan chan utils.VEvent) {
 	for e := range AppChan {
-		Log.Info(e)
+		switch e.Topic {
+		case "StatusUpdate":
+			UIChan <- e
+		case "OpenMainWindow":
+			UIChan <- e
+		default:
+			Log.Info(e)
+		}
 	}
 }

@@ -3,6 +3,8 @@ package app
 import (
 	"github.com/therecipe/qt/gui"
 	"github.com/therecipe/qt/widgets"
+	"vorta-go/models"
+	"vorta-go/utils"
 )
 
 type systemTray struct {
@@ -31,8 +33,19 @@ func InitTray() {
 
 func (t *systemTray) drawMenu() {
 	t.menu.Clear()
-	t.menu.AddAction("Vorta for Borg Backup")
+	t.menu.AddAction("Vorta for Borg Backup").ConnectTriggered(
+		func(checked bool) {
+			AppChan <- utils.VEvent{Topic: "OpenMainWindow", Data: "From Tray"}
+		})
 	t.menu.AddSeparator()
-	t.menu.AddAction("Backup Now")
-	t.menu.AddAction("Quit")
+	//t.menu.AddAction("Backup Now")
+	profileMenu := t.menu.AddMenu2("Backup Now")
+	pp := []models.Profile{}
+	models.DB.Select(&pp, models.SqlAllProfiles)
+	for _, p := range pp {
+		profileName := p.Name
+		profileMenu.AddAction(p.Name).ConnectTriggered(func(checked bool) {Log.Info("Would backup profile", profileName)})
+	}
+
+	t.menu.AddAction("Quit").ConnectTriggered(func(checked bool) {QtApp.Quit()})
 }
