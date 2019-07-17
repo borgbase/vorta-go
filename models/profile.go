@@ -8,8 +8,13 @@ import (
 var (
 	SqlAllProfiles = "SELECT * FROM backupprofilemodel ORDER BY name ASC"
 	SqlProfileById = "SELECT * FROM backupprofilemodel WHERE id=?"
-	SqlOneProfile =  "SELECT * FROM backupprofilemodel LIMIT 1"
 	SqlCountProfiles = "SELECT count(*) from backupprofilemodel"
+	SqlUpdateProfile = `UPDATE backupprofilemodel SET x = y WHERE z = y;`
+    SqlNewProfile = `INSERT INTO "backupprofilemodel"
+					  VALUES (1, ?, (DATETIME('now')), 14, NULL, 'zstd,3', '*/.DS_Store', '.nobackup', 
+							  'off', 1, 24, 17, 54, 1, 3, 0, 2, 7, 4, 6, 2, '', '{hostname}__{profile_slug}-{now:%Y-%m-%dT%H:%M:%S}', 
+							  '{hostname}-{profile_slug}-', '', ''
+					)`
 )
 
 type Profile struct {
@@ -43,6 +48,12 @@ type Profile struct {
 	PrunePrefix string `db:"prune_prefix"`
 	PreBackupCmd string `db:"pre_backup_cmd"`
 	PostBackupCmd string `db:"post_backup_cmd"`
+}
+
+func (p *Profile) GetRepo() *Repo {
+	r := Repo{}
+	DB.Get(&r, SqlRepoById, p.RepoId)
+	return &r
 }
 
 
@@ -79,31 +90,3 @@ CREATE TABLE IF NOT EXISTS "backupprofilemodel"
   );
 `
 
-var SqlProfileDefaultRow = `
-INSERT INTO "backupprofilemodel"
-VALUES      (1,
-             'Default',
-             (DATETIME('now')),
-             14,
-             NULL,
-             'zstd,3',
-             '*/.DS_Store',
-             '.nobackup',
-             'off',
-             1,
-             24,
-             17,
-             54,
-             1,
-             3,
-             0,
-             2,
-             7,
-             4,
-             6,
-             2,
-             '',
-             '{hostname}__{profile_slug}-{now:%Y-%m-%dT%H:%M:%S}',
-             '{hostname}-{profile_slug}-',
-             '',
-             '')`

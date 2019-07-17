@@ -24,7 +24,7 @@ func InitDb(dbPath string) {
 	var nProfiles int
 	DB.Get(&nProfiles, SqlCountProfiles)
 	if nProfiles == 0 {
-		DB.MustExec(SqlProfileDefaultRow)
+		DB.MustExec(SqlNewProfile, "Default")
 	}
 
 	if err != nil {

@@ -3,6 +3,7 @@ package borg
 import (
 	"encoding/json"
 	"io"
+	"vorta-go/utils"
 
 	"errors"
 	"fmt"
@@ -85,7 +86,7 @@ func (r *BorgRun) Run() {
 			if err != nil {
 				app.Log.Error(err)
 			}
-			app.StatusUpdateChannel <- l.Message
+			app.AppChan <- utils.VEvent{Topic: "StatusUpdate", Data: l.Message}
 			app.Log.Info(l.Message)
 		}
 	}()
@@ -93,7 +94,7 @@ func (r *BorgRun) Run() {
 	if err := cmd.Start(); err != nil {
 		log.Fatal(err)
 	}
-	app.StatusUpdateChannel <- "Started Command"
+	app.AppChan <- utils.VEvent{Topic: "StatusUpdate", Data: "Started Command"}
 
 	var result map[string]interface{}
 	if err := json.NewDecoder(stdout).Decode(&result); err != nil {
@@ -103,7 +104,7 @@ func (r *BorgRun) Run() {
 	if err := cmd.Wait(); err != nil {
 		log.Fatal(err)
 	}
-	app.StatusUpdateChannel <- "Finished Command"
+	app.AppChan <- utils.VEvent{Topic: "StatusUpdate", Data: "Finished Command"}
 	borgProcessSlot.Release(1)
 
 	fmt.Println(result)

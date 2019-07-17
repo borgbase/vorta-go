@@ -1,6 +1,7 @@
 package models
 
 import (
+	"database/sql"
 	"time"
 )
 
@@ -27,10 +28,10 @@ type Repo struct {
 	Id int
 	Url string
 	AddedAt time.Time `db:"added_at"`
-	Encryption string
-	UniqueSize uint64 `db:"unique_size"`
-	UniqueCsize uint64 `db:"unique_csize"`
-	TotalSize uint64 `db:"total_size"`
-	TotalUniqueChunks uint64 `db:"total_unique_chunks"`
-	ExtraBorgArguments string `db:"extra_borg_arguments"`
+	Encryption sql.NullString
+	UniqueSize sql.NullInt64 `db:"unique_size"`
+	UniqueCsize sql.NullInt64 `db:"unique_csize"`
+	TotalSize sql.NullInt64 `db:"total_size"`
+	TotalUniqueChunks sql.NullInt64 `db:"total_unique_chunks"`
+	ExtraBorgArguments sql.NullString `db:"extra_borg_arguments"`
 }

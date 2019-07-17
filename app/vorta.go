@@ -6,18 +6,14 @@ import (
 	"github.com/therecipe/qt/widgets"
 	"io"
 	"os"
-	"os/exec"
 	"path"
-	"vorta-go/models"
+	"vorta-go/utils"
 )
 
 var (
-	QtApp *widgets.QApplication
-	StatusUpdateChannel chan string
-	CurrentCommand *exec.Cmd
+	AppChan   chan utils.VEvent
 	ConfigDir appdir.Dirs
-	Log *logrus.Logger
-	CurrentProfile *models.Profile
+	Log       *logrus.Logger
 )
 
 func InitApp() {
@@ -47,7 +43,13 @@ func InitApp() {
 	Log.SetOutput(mw)
 	Log.Info("Logging Ready.")
 
-	QtApp = widgets.NewQApplication(len(os.Args), os.Args)
-	StatusUpdateChannel = make(chan string)
+	widgets.NewQApplication(len(os.Args), os.Args)
+
 	InitTray()
+}
+
+func RunAppEventHandler(UIChan chan utils.VEvent) {
+	for e := range AppChan {
+		Log.Info(e)
+	}
 }
