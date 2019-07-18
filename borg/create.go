@@ -32,7 +32,6 @@ func NewCreateRun(profile *models.Profile) (*CreateRun, error) {
 		lines := strings.Split(excludeString,`\n`)
 		for  _, l := range lines {
 			l = strings.TrimSpace(l)
-			//expand path??
 			excludePatterns = append(excludePatterns, l)
 		}
 

@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"fmt"
 	"github.com/therecipe/qt/core"
 	"vorta-go/models"
 	"vorta-go/utils"
@@ -61,6 +62,8 @@ func (w *MainWindow) AddTabs() {
 	w.TabWidget.AddTab(Tabs.MiscTab, "Misc")
 
 	Tabs.RepoTab.Populate()
+	Tabs.SourceTab.Populate()
+	Tabs.ScheduleTab.Populate()
 }
 
 func (w *MainWindow) profileSelectorChanged(ix int) {
@@ -84,8 +87,11 @@ func (w *MainWindow) RunUIEventHandler(appChan chan utils.VEvent) {
 		case "ChangeRepo":
 			utils.Log.Info("Repo changed")
 			models.DB.Get(currentRepo, models.SqlRepoById, e.Message)
+			currentProfile.RepoId = currentRepo.Id
+			models.DB.NamedExec(fmt.Sprintf(models.SqlUpdateProfileFieldById, "repo_id"), currentProfile)
 			Tabs.RepoTab.Populate()
-			// TODO: Save changed repoId to profile
+			Tabs.SourceTab.Populate()
+			Tabs.ScheduleTab.Populate()
 		case "StartBackup":
 			appChan <- e
 		case "OpenMainWindow":

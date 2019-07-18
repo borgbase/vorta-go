@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"time"
+	"fmt"
 
 	"github.com/gosimple/slug"
 )
@@ -11,10 +12,10 @@ var (
 	SqlAllProfiles = "SELECT * FROM backupprofilemodel ORDER BY name ASC"
 	SqlProfileById = "SELECT * FROM backupprofilemodel WHERE id=?"
 	SqlCountProfiles = "SELECT count(*) from backupprofilemodel"
-	SqlUpdateProfile = `UPDATE backupprofilemodel SET x = y WHERE z = y;`
+	SqlUpdateProfileFieldById = `UPDATE backupprofilemodel SET %[1]v = :%[1]v WHERE id = :id;`
     SqlNewProfile = `INSERT INTO "backupprofilemodel"
 					  VALUES (1, ?, (DATETIME('now')), 14, NULL, 'zstd,3', '*/.DS_Store', '.nobackup', 
-							  'off', 1, 24, 17, 54, 1, 3, 0, 2, 7, 4, 6, 2, '', '{hostname}__{profile_slug}-{now:%Y-%m-%dT%H:%M:%S}', 
+							  'off', 1, 24, 17, 54, 1, 3, 0, 2, 7, 4, 6, 2, '', '{hostname}__{profile_slug}-{now}', 
 							  '{hostname}-{profile_slug}-', '', ''
 					)`
 )
@@ -60,6 +61,12 @@ func (p *Profile) GetRepo() *Repo {
 
 func (p *Profile) Slug() string {
 	return slug.Make(p.Name)
+}
+
+func (p *Profile) UpdateField(field string) error {
+	Sql := fmt.Sprintf(SqlUpdateProfileFieldById, field)
+	_, err := DB.NamedExec(Sql, p)
+	return err
 }
 
 

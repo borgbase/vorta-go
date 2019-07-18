@@ -42,16 +42,9 @@
      <item>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="QPushButton" name="sourceAddFolder">
-         <property name="text">
-          <string>Add Folder</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QPushButton" name="sourceAddFile">
          <property name="text">
-          <string>Add File</string>
+          <string>Add</string>
          </property>
         </widget>
        </item>

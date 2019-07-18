@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"fmt"
 	"github.com/dustin/go-humanize"
 	"github.com/therecipe/qt/core"
 	"vorta-go/models"
@@ -36,8 +37,13 @@ func (t *RepoTab) init() {
 	t.RepoCompression.ConnectCurrentIndexChanged(t.compressionSelectorChanged)
 }
 
-func (t *RepoTab) compressionSelectorChanged(newIndex int) {
-
+func (t *RepoTab) compressionSelectorChanged(ix int) {
+	currentProfile.Compression = t.RepoCompression.ItemData(ix, int(core.Qt__UserRole)).ToString()
+	sql := fmt.Sprintf(models.SqlUpdateProfileFieldById, "compression")
+	_, err := models.DB.NamedExec(sql, currentProfile)
+	if err != nil {
+		utils.Log.Error(err)
+	}
 }
 
 func (t *RepoTab) setCompression() {

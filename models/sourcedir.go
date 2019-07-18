@@ -6,6 +6,9 @@ import (
 
 var (
 	SqlAllSourcesByProfileId = "SELECT * FROM sourcedirmodel WHERE profile_id=?"
+	SqlCountSources = `SELECT count(*) FROM sourcedirmodel WHERE profile_id=? and dir=?`
+	SqlInsertSourceDir = `INSERT INTO sourcedirmodel VALUES (NULL, ?, ?, DATETIME('now'))`
+	SqlDeleteSourceDir = `DELETE FROM sourcedirmodel WHERE profile_id=? and dir=?`
 )
 
 var SqlSourceDirSchema = `
