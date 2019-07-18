@@ -8,19 +8,18 @@ type InfoRun struct {
 	BorgRun
 }
 
-func NewInfoRun(profile *models.Profile, repo *models.Repo) (*InfoRun, error) {
+func NewInfoRun(profile *models.Profile) (*InfoRun, error) {
 	r := &InfoRun{}
 	r.SubCommand = "info"
 	r.SubCommandArgs = []string{"--json"}
 	r.Profile = profile
-	r.Repo = repo
 
 	err := r.Prepare()
 	if err != nil {
 		return nil, err
 	}
 
-	r.SubCommandArgs = append(r.SubCommandArgs, repo.Url)
+	r.SubCommandArgs = append(r.SubCommandArgs, r.Repo.Url)
 	return r, nil
 }
 

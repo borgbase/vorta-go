@@ -3,6 +3,8 @@ package models
 import (
 	"database/sql"
 	"time"
+
+	"github.com/gosimple/slug"
 )
 
 var (
@@ -54,6 +56,10 @@ func (p *Profile) GetRepo() *Repo {
 	r := Repo{}
 	DB.Get(&r, SqlRepoById, p.RepoId)
 	return &r
+}
+
+func (p *Profile) Slug() string {
+	return slug.Make(p.Name)
 }
 
 

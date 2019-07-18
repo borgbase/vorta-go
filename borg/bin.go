@@ -2,11 +2,11 @@ package borg
 
 import (
 	"errors"
-	"path"
-	"path/filepath"
 	"os"
 	"os/exec"
-	"vorta-go/app"
+	"path"
+	"path/filepath"
+	"vorta-go/utils"
 )
 
 type BorgBin struct {
@@ -20,7 +20,7 @@ func NewBorgBin() (*BorgBin, error) {
 	if err == nil {
 		return &BorgBin{Path: pathBin}, nil
 	} else {
-		app.Log.Info("Borg binary not found in path.")
+		utils.Log.Info("Borg binary not found in path.")
 	}
 
 	// Check in Resources folder (macOS)
@@ -30,7 +30,7 @@ func NewBorgBin() (*BorgBin, error) {
 	if _, err := os.Stat(resourceBin); err == nil {
 		return &BorgBin{Path: resourceBin}, nil
 	} else {
-		app.Log.Info("Borg binary not found in Resources folder.")
+		utils.Log.Info("Borg binary not found in Resources folder.")
 	}
 	return nil, errors.New("Couldn't find borg binary to use.")
 }

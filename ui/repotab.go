@@ -1,9 +1,8 @@
 package ui
 
 import (
-	"github.com/therecipe/qt/core"
 	"github.com/dustin/go-humanize"
-	"vorta-go/app"
+	"github.com/therecipe/qt/core"
 	"vorta-go/models"
 	"vorta-go/utils"
 )
@@ -56,15 +55,13 @@ func (t *RepoTab) setStats() {
 
 func (t *RepoTab) Populate() {
 	ix := t.RepoSelector.FindData(core.NewQVariant1(currentRepo.Id), int(core.Qt__UserRole), core.Qt__MatchExactly)
-	app.Log.Info("Need repo at index ", ix)
 	t.RepoSelector.SetCurrentIndex(ix)
 	t.setStats()
 	t.setCompression()
 }
 
 func (t *RepoTab) repoSelectorChanged(newIndex int) {
-	app.Log.Info("Repo changed.")
 	id := t.RepoSelector.CurrentData(int(core.Qt__UserRole))
-	MainWindowChan <- utils.VEvent{Topic: "ChangeRepo", Data: id.ToString()}
+	MainWindowChan <- utils.VEvent{Topic: "ChangeRepo", Message: id.ToString()}
 
 }

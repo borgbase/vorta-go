@@ -35,7 +35,7 @@ func (t *systemTray) drawMenu() {
 	t.menu.Clear()
 	t.menu.AddAction("Vorta for Borg Backup").ConnectTriggered(
 		func(checked bool) {
-			AppChan <- utils.VEvent{Topic: "OpenMainWindow", Data: "From Tray"}
+			AppChan <- utils.VEvent{Topic: "OpenMainWindow", Message: "From Tray"}
 		})
 	t.menu.AddSeparator()
 	//t.menu.AddAction("Backup Now")
@@ -44,7 +44,7 @@ func (t *systemTray) drawMenu() {
 	models.DB.Select(&pp, models.SqlAllProfiles)
 	for _, p := range pp {
 		profileName := p.Name
-		profileMenu.AddAction(p.Name).ConnectTriggered(func(checked bool) {Log.Info("Would backup profile", profileName)})
+		profileMenu.AddAction(p.Name).ConnectTriggered(func(checked bool) {utils.Log.Info("Would backup profile", profileName)})
 	}
 
 	t.menu.AddAction("Quit").ConnectTriggered(func(checked bool) {QtApp.Quit()})
