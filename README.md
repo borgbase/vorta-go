@@ -26,6 +26,8 @@ See the `Makefile` for different deployment options. Needs Docker installed. E.g
 For Linux, Qt5 is linked dynamically to match your distro's look and feel. Install required Qt5 packages like this:
 
 - Ubuntu/Debian: `$ apt install qt5-default libqt5qml5`
+- Archlinux: `$ pacman -S qt5`
+- Fedora: `$ yum install qt5-qtbase`
 
 ## License and Credits
 - Thank you to all the people who already contributed to Vorta: [code](https://github.com/borgbase/vorta/graphs/contributors), [translations](https://github.com/borgbase/vorta/issues/159)

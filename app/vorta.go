@@ -3,6 +3,8 @@ package app
 import (
 	"github.com/therecipe/qt/widgets"
 	"os"
+	"runtime"
+	"strings"
 	"vorta-go/utils"
 )
 
@@ -12,19 +14,13 @@ var (
 )
 
 func InitApp() {
-	requiredFolders := []string{utils.ConfigDir.UserLogs(), utils.ConfigDir.UserData()}
-	for _, p := range requiredFolders {
-		if _, err := os.Stat(p); os.IsNotExist(err) {
-			err := os.Mkdir(p, os.ModePerm)
-			if err != nil {
-				panic("Unable to create required folder.")
-			}
-		}
-	}
-
 	// Set up Qt App
 	QtApp = widgets.NewQApplication(len(os.Args), os.Args)
 	QtApp.SetQuitOnLastWindowClosed(false)
+
+	if strings.HasPrefix(runtime.GOOS, "linux") {
+		QtApp.SetStyle2("fusion")
+	}
 
 	InitTray()
 }

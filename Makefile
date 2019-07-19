@@ -4,9 +4,8 @@ DISTRO ?= ubuntu_19_04
 
 linux:
 	docker build -f docker/$(DISTRO).Dockerfile -t vorta/$(DISTRO) .
-	docker cp $$(docker ps -alq):/home/user/vorta/deploy/linux/vorta deploy/linux
-	upx deploy/linux/vorta
-	mv deploy/linux/vorta deploy/linux/vorta-$(DISTRO)
+	ID=$$(docker create vorta/archlinux) && docker cp $$ID:/home/user/vorta/deploy/linux/vorta deploy/linux/vorta-$(DISTRO) && docker rm -v $$ID
+	upx deploy/linux/vorta-$(DISTRO)
 
 darwin:
 	qtdeploy -uic=false -quickcompiler build

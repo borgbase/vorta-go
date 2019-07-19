@@ -119,7 +119,7 @@ func (r *BorgRun) Run() error {
 
 	err = cmd.Wait()
 	borgProcessSlot.Release(1)
-	
+
 	if err != nil {
 		utils.Log.Error(err)
 		AppEventChan <- utils.VEvent{Topic: "StatusUpdate", Message: "Borg finished with errors."}
