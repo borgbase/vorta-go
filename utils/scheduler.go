@@ -29,16 +29,24 @@ func (s *SchedulerCls) ReloadJobs() {
 	pp := []models.Profile{}
 	models.DB.Select(&pp, models.SqlAllProfiles)
 	for _, p := range pp {
-		if p.ScheduleMode == "interval" {
-			newJob := VortaJob{ProfileId: p.Id}
-			cronStr := fmt.Sprintf("%d */%d * * *", p.ScheduleIntervalMinutes, p.ScheduleIntervalHours)
-			jobId, err := s.Cron.AddJob(cronStr, newJob)
-			if err != nil {
-				Log.Error(err)
-			}
-			s.IdToProfileMap[p.Id] = jobId
-			Log.Info("Scheduled job for profile ", p.Name, jobId)
+		var cronStr string
+		var newJob VortaJob
+		switch p.ScheduleMode {
+		case "interval":
+			newJob = VortaJob{ProfileId: p.Id}
+			cronStr = fmt.Sprintf("%d */%d * * *", p.ScheduleIntervalMinutes, p.ScheduleIntervalHours)
+		case "fixed":
+			newJob = VortaJob{ProfileId: p.Id}
+			cronStr = fmt.Sprintf("%d %d * * *", p.ScheduleFixedMinute, p.ScheduleFixedHour)
+		default:
+			continue
 		}
+		jobId, err := s.Cron.AddJob(cronStr, newJob)
+		if err != nil {
+			Log.Error(err)
+		}
+		s.IdToProfileMap[p.Id] = jobId
+		Log.Info("Scheduled job for profile ", p.Name)
 	}
 	s.Cron.Start()
 	Log.Info("Reloaded Scheduler.")
@@ -57,9 +65,8 @@ func (s *SchedulerCls) NextTimeForProfile(profileId int) string {
 			return e.Next.Format("2006-01-02 15:04")
 		}
 	}
-	return "None scheduled"  //TODO: can be more elegant
+	return "None scheduled"  //TODO: could be more elegant
 }
-
 
 type VortaJob struct {
 	cron.Job

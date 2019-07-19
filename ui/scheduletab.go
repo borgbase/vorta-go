@@ -11,29 +11,33 @@ var schedulerRadioMap map[string]*widgets.QRadioButton
 func (t *ScheduleTab) init() {
 	t.ToolBox.SetCurrentIndex(0)
 
-	t.ScheduleApplyButton.ConnectClicked(func(_ bool) {
-		utils.Log.Info("Applying new schedule.")
-		for k, v := range schedulerRadioMap {
-			if v.IsChecked() {
-				currentProfile.
-			}
-		}
-
-		utils.Scheduler.ReloadJobs()
-	})
-
-	t.PreBackupCmdLineEdit.ConnectTextChanged(func(text string) {
-
-	})
-	t.PostBackupCmdLineEdit.ConnectTextChanged(func(text string) {
-
-	})
-
 	schedulerRadioMap = map[string]*widgets.QRadioButton{
 		"off": t.ScheduleOffRadio,
 		"interval": t.ScheduleIntervalRadio,
 		"fixed": t.ScheduleFixedRadio,
 	}
+
+	t.ScheduleApplyButton.ConnectClicked(func(_ bool) {
+		utils.Log.Info("Applying new schedule.")
+		for k, v := range schedulerRadioMap {
+			if v.IsChecked() {
+				currentProfile.ScheduleMode = k
+				currentProfile.UpdateField("schedule_mode")
+				break
+			}
+		}
+		utils.Scheduler.ReloadJobs()
+		t.setNextBackupTime()
+	})
+
+	t.PreBackupCmdLineEdit.ConnectTextChanged(func(text string) {
+		currentProfile.PreBackupCmd = text
+		currentProfile.UpdateField("pre_backup_cmd")
+	})
+	t.PostBackupCmdLineEdit.ConnectTextChanged(func(text string) {
+		currentProfile.PostBackupCmd = text
+		currentProfile.UpdateField("post_backup_cmd")
+	})
 }
 
 func (t *ScheduleTab) Populate() {

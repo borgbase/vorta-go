@@ -34,5 +34,6 @@ require (
 	golang.org/x/text v0.3.2 // indirect
 	golang.org/x/tools v0.0.0-20190716021316-fefcef05abb1 // indirect
 	gopkg.in/guregu/null.v3 v3.4.0 // indirect
+	howett.net/plist v0.0.0-20181124034731-591f970eefbb
 
 )

@@ -61,9 +61,10 @@ func (w *MainWindow) AddTabs() {
 	w.TabWidget.AddTab(Tabs.ArchiveTab, "Archives")
 	w.TabWidget.AddTab(Tabs.MiscTab, "Misc")
 
-	Tabs.RepoTab.Populate()
-	Tabs.SourceTab.Populate()
-	Tabs.ScheduleTab.Populate()
+	go Tabs.RepoTab.Populate()
+	go Tabs.SourceTab.Populate()
+	go Tabs.ScheduleTab.Populate()
+	go Tabs.ArchiveTab.Populate()
 }
 
 func (w *MainWindow) profileSelectorChanged(ix int) {
@@ -92,6 +93,7 @@ func (w *MainWindow) RunUIEventHandler(appChan chan utils.VEvent) {
 			Tabs.RepoTab.Populate()
 			Tabs.SourceTab.Populate()
 			Tabs.ScheduleTab.Populate()
+			Tabs.ArchiveTab.Populate()
 		case "StartBackup":
 			appChan <- e
 		case "OpenMainWindow":
