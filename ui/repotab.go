@@ -18,6 +18,11 @@ var availableCompression = map[string]string{
 }
 
 func (t *RepoTab) init() {
+	// Populate Compression modes
+	for desc, value := range availableCompression {
+		t.RepoCompression.AddItem(desc, core.NewQVariant1(value))
+	}
+	t.RepoCompression.ConnectCurrentIndexChanged(t.compressionSelectorChanged)
 
 	// Populate available Repos
 	t.RepoSelector.AddItem("+ Initialize New Repository", core.NewQVariant1("new"))
@@ -30,11 +35,6 @@ func (t *RepoTab) init() {
 	}
 	t.RepoSelector.ConnectCurrentIndexChanged(t.repoSelectorChanged)
 
-	// Populate Compression modes
-	for desc, value := range availableCompression {
-		t.RepoCompression.AddItem(desc, core.NewQVariant1(value))
-	}
-	t.RepoCompression.ConnectCurrentIndexChanged(t.compressionSelectorChanged)
 }
 
 func (t *RepoTab) compressionSelectorChanged(ix int) {
@@ -62,12 +62,37 @@ func (t *RepoTab) setStats() {
 func (t *RepoTab) Populate() {
 	ix := t.RepoSelector.FindData(core.NewQVariant1(currentRepo.Id), int(core.Qt__UserRole), core.Qt__MatchExactly)
 	t.RepoSelector.SetCurrentIndex(ix)
+
 	t.setStats()
 	t.setCompression()
 }
 
-func (t *RepoTab) repoSelectorChanged(newIndex int) {
-	id := t.RepoSelector.CurrentData(int(core.Qt__UserRole))
-	MainWindowChan <- utils.VEvent{Topic: "ChangeRepo", Message: id.ToString()}
-
+func (t *RepoTab) repoSelectorChanged(index int) {
+	itemData := t.RepoSelector.ItemData(index, int(core.Qt__UserRole)).ToString()
+	if index == 0 {
+		return
+	} else if itemData == "new" {
+		dialog := NewRepoAddDialog(t)
+		dialog.SetParent2(t, core.Qt__Sheet)
+		dialog.ConnectAccepted(func(){
+			utils.Log.Info("Dialog Accepeted")
+		})
+		dialog.ConnectRejected(func(){
+			utils.Log.Info("Dialog Rejected")
+		})
+		dialog.Show()
+	} else if itemData == "existing" {
+		dialog := NewRepoAddDialog(t)
+		dialog.UseForExistingRepo()
+		dialog.SetParent2(t, core.Qt__Sheet)
+		dialog.ConnectAccepted(func(){
+			utils.Log.Info("Dialog Accepeted")
+		})
+		dialog.ConnectRejected(func(){
+			utils.Log.Info("Dialog Rejected")
+		})
+		dialog.Show()
+	} else {
+		MainWindowChan <- utils.VEvent{Topic: "ChangeRepo", Message: itemData}
+	}
 }

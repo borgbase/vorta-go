@@ -8,6 +8,8 @@ import (
 var (
 	SqlAllRepos = "SELECT * FROM repomodel ORDER BY url ASC"
 	SqlRepoById = "SELECT * FROM repomodel WHERE id=?"
+	SqlNewRepo = `INSERT INTO repomodel VALUES (NULL, :url, DATETIME('now'), :encryption, 
+					:unique_size, :unique_csize, :total_size, :total_unique_chunks, :extra_borg_arguments)`
 )
 
 var SqlRepoSchema = `

@@ -4,6 +4,7 @@ go 1.12
 
 require (
 	github.com/ProtonMail/go-appdir v1.0.0
+	github.com/bitly/go-simplejson v0.5.0
 	github.com/danieljoos/wincred v1.0.2 // indirect
 	github.com/dustin/go-humanize v1.0.0
 	github.com/godbus/dbus v4.1.0+incompatible // indirect

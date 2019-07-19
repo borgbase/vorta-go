@@ -3,6 +3,7 @@ package ui
 import (
 	"fmt"
 	"github.com/therecipe/qt/core"
+	"github.com/therecipe/qt/widgets"
 	"vorta-go/models"
 	"vorta-go/utils"
 )
@@ -61,10 +62,10 @@ func (w *MainWindow) AddTabs() {
 	w.TabWidget.AddTab(Tabs.ArchiveTab, "Archives")
 	w.TabWidget.AddTab(Tabs.MiscTab, "Misc")
 
-	go Tabs.RepoTab.Populate()
-	go Tabs.SourceTab.Populate()
-	go Tabs.ScheduleTab.Populate()
-	go Tabs.ArchiveTab.Populate()
+	Tabs.RepoTab.Populate()
+	Tabs.SourceTab.Populate()
+	Tabs.ScheduleTab.Populate()
+	Tabs.ArchiveTab.Populate()
 }
 
 func (w *MainWindow) profileSelectorChanged(ix int) {
@@ -98,9 +99,19 @@ func (w *MainWindow) RunUIEventHandler(appChan chan utils.VEvent) {
 			appChan <- e
 		case "OpenMainWindow":
 			w.Show()
+			w.Raise()
+			w.ActivateWindow()
 		default:
 			utils.Log.Info("Unhandled UI Channel Event")
 		}
 
 	}
+}
+
+func ChooseFileDialog(callback func(files []string)) {
+	fd := widgets.NewQFileDialog(nil, 0)
+	fd.SetFileMode(widgets.QFileDialog__AnyFile)
+	fd.SetWindowModality(core.Qt__WindowModal)  //TODO: not working on macOS?
+	fd.ConnectFilesSelected(callback)
+	fd.Exec()
 }

@@ -17,7 +17,6 @@ func NewCreateRun(profile *models.Profile) (*CreateRun, error) {
 	r.SubCommand = "create"
 	r.SubCommandArgs = []string{"--json", "--list", "--filter=AM", "-C", profile.Compression}
 	r.Profile = profile
-	r.Repo = profile.GetRepo()
 
 	// Do global preparations
 	err := r.Prepare()
@@ -47,7 +46,7 @@ func NewCreateRun(profile *models.Profile) (*CreateRun, error) {
 	//cmd.extend(['--exclude-if-present', f.strip()])
 
 	newArchiveName := _formatArchiveName(r.Profile)
-	r.SubCommandArgs = append(r.SubCommandArgs, r.Repo.Url+"::"+newArchiveName)
+	r.SubCommandArgs = append(r.SubCommandArgs, r.Profile.GetRepo().Url+"::"+newArchiveName)
 
 	ss := []models.SourceDir{}
 	err = models.DB.Select(&ss, models.SqlAllSourcesByProfileId, r.Profile.Id)
@@ -61,6 +60,6 @@ func NewCreateRun(profile *models.Profile) (*CreateRun, error) {
 	return r, nil
 }
 
-func (r *CreateRun) ProcessResult() {
-	
+func (r *CreateRun) ProcessResult(result map[string]interface{}) {
+	utils.Log.Info(result)
 }

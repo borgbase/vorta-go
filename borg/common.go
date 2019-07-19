@@ -1,23 +1,23 @@
 package borg
 
 import (
+	"bytes"
 	"encoding/json"
+	"github.com/zalando/go-keyring"
+	"github.com/bitly/go-simplejson"
 	"io"
-
-	//"io"
+	"fmt"
 	"os/user"
 	"strings"
 	"time"
 	"vorta-go/utils"
 
 	"errors"
-	"fmt"
+	"golang.org/x/sync/semaphore"
 	"os"
 	"os/exec"
-	"golang.org/x/sync/semaphore"
-	"github.com/zalando/go-keyring"
 	"vorta-go/models"
-	)
+)
 
 
 var (
@@ -32,7 +32,11 @@ type BorgRun struct {
 	SubCommand string
 	SubCommandArgs []string
 	Repo *models.Repo
+	RepoPassword string
+	Env []string
 	Profile *models.Profile
+	Result *simplejson.Json
+	PlainTextResult string
 }
 
 type BorgLogMessage struct {
@@ -44,11 +48,6 @@ type BorgLogMessage struct {
 }
 
 func (r *BorgRun) Prepare() error {
-	// Get Repo object from Profile
-	r.Repo = &models.Repo{}
-	models.DB.Get(r.Repo, models.SqlRepoById, r.Profile.RepoId)
-	utils.Log.Info("Backing up to repo", r.Repo.Url)
-
 	// checks: binary available,
 	var err error
 	r.Bin, err = NewBorgBin()
@@ -61,33 +60,36 @@ func (r *BorgRun) Prepare() error {
 		return errors.New("Backup is already in progress.")
 	}
 
+	// Set password if not yet defined
+	if r.RepoPassword == "" {
+		secret, err := keyring.Get("vorta-repo", r.Repo.Url)
+		if err != nil {
+			utils.Log.Error(err)
+		} else {
+			r.RepoPassword = secret
+		}
+	}
+
+	// TODO: deal with BORG_PASSCOMMAND
+	r.Env = os.Environ()
+	r.Env = append(r.Env, fmt.Sprintf("BORG_PASSPHRASE=%s", r.RepoPassword))
+
 	r.CommonBorgArgs = append(r.CommonBorgArgs, "--info", "--log-json")
 	return nil
 }
 
 
-func (r *BorgRun) Run() {
+func (r *BorgRun) Run() error {
 	mergedArgs := append(r.CommonBorgArgs, r.SubCommand)
 	mergedArgs = append(mergedArgs, r.SubCommandArgs...)
-	utils.Log.Info(mergedArgs)
+	utils.Log.Info("Running command: ", r.Bin.Path, mergedArgs)
 	cmd := exec.Command(
 		r.Bin.Path,
 		mergedArgs...
 		)
 
-	secret, err := keyring.Get("vorta-repo", r.Repo.Url)
-	if err != nil {
-		utils.Log.Fatal(err)
-	}
-
-	cmd.Env = os.Environ()
-	cmd.Env = append(cmd.Env, fmt.Sprintf("BORG_PASSPHRASE=%s", secret))
-
-
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		utils.Log.Fatal(err)
-	}
+	var stdOutBuf bytes.Buffer
+	cmd.Stdout = &stdOutBuf
 
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
@@ -103,8 +105,6 @@ func (r *BorgRun) Run() {
 				return
 			}
 			if err != nil {
-				utils.Log.Error(err)
-				utils.Log.Error(l)
 				continue
 			}
 			AppEventChan <- utils.VEvent{Topic: "StatusUpdate", Message: l.Message}
@@ -113,23 +113,32 @@ func (r *BorgRun) Run() {
 	}()
 
 	if err := cmd.Start(); err != nil {
-		utils.Log.Fatal(err)
+		utils.Log.Error(err)
 	}
 	AppEventChan <- utils.VEvent{Topic: "StatusUpdate", Message: "Started Command"}
 
-	var result map[string]interface{}
-	if err := json.NewDecoder(stdout).Decode(&result); err != nil {
-		utils.Log.Fatal(err)
-	}
-
-	if err := cmd.Wait(); err != nil {
-		utils.Log.Fatal(err)
+	err = cmd.Wait()
+	borgProcessSlot.Release(1)
+	
+	if err != nil {
+		utils.Log.Error(err)
+		AppEventChan <- utils.VEvent{Topic: "StatusUpdate", Message: "Borg finished with errors."}
+		return err
 	}
 	AppEventChan <- utils.VEvent{Topic: "StatusUpdate", Message: "Finished Command"}
-	borgProcessSlot.Release(1)
 
-	fmt.Println(result)
+	// Try to parse json stdout
+	stdOutResult := stdOutBuf.Bytes()
+	r.Result, err= simplejson.NewJson(stdOutResult)
+	if err != nil {
+		utils.Log.Error("Failed parsing JSON.", err)
+		r.PlainTextResult = string(stdOutResult)
+	}
+
+	return nil
 }
+
+func (r *BorgRun) ProcessResult(result map[string]interface{}) {}
 
 func _formatArchiveName(p *models.Profile) string {
 	// Time formatting: https://stackoverflow.com/a/20234207/3983708

@@ -1,8 +1,6 @@
 package ui
 
 import (
-	"github.com/therecipe/qt/core"
-	"github.com/therecipe/qt/widgets"
 	"vorta-go/models"
 	"vorta-go/utils"
 )
@@ -57,11 +55,4 @@ func (t *SourceTab) Populate() {
 
 }
 
-func ChooseFileDialog(callback func(files []string)) {
-	fd := widgets.NewQFileDialog(nil, 0)
-	fd.SetFileMode(widgets.QFileDialog__AnyFile)
-	fd.SetWindowModality(core.Qt__WindowModal)  //TODO: not working on macOS?
-	fd.ConnectFilesSelected(callback)
-	fd.Exec()
-}
 
