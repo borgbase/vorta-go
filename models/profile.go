@@ -2,6 +2,9 @@ package models
 
 import (
 	"database/sql"
+	"os"
+	"os/user"
+	"strings"
 	"time"
 	"fmt"
 
@@ -63,10 +66,34 @@ func (p *Profile) Slug() string {
 	return slug.Make(p.Name)
 }
 
-func (p *Profile) UpdateField(field string) error {
+func (p *Profile) SaveField(field string) error {
 	Sql := fmt.Sprintf(SqlUpdateProfileFieldById, field)
 	_, err := DB.NamedExec(Sql, p)
 	return err
+}
+
+func (p *Profile) FormatArchiveName() string {
+	// Time formatting: https://stackoverflow.com/a/20234207/3983708
+	// TODO: fully support time formatting?
+	timeFormat := "2006-01-02T15:04:05"
+	hostname, _ := os.Hostname()
+	user, _ := user.Current()
+	r := strings.NewReplacer(
+		"{hostname}", hostname,
+		"{profile_id}", string(p.Id),
+		"{profile_slug}", p.Slug(),
+		"{now}", time.Now().Format(timeFormat),
+		"{now:%Y-%m-%dT%H:%M:%S}", time.Now().Format(timeFormat),
+		"{utc_now}", time.Now().UTC().Format(timeFormat),
+		"{user}", user.Username,
+	)
+
+	// Fallback if no archive name is set.
+	if p.NewArchiveName != "" {
+		return r.Replace(p.NewArchiveName)
+	} else {
+		return time.Now().Format(timeFormat)
+	}
 }
 
 

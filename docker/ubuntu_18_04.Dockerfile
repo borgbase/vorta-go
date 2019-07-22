@@ -8,6 +8,7 @@ ENV GOPATH $HOME/work
 ENV PATH /usr/local/go/bin:$PATH
 ENV QT_DOCKER true
 ENV QT_PKG_CONFIG true
+ENV QT_API 5.9.0
 
 RUN apt-get -qq update && apt-get --no-install-recommends -qq -y install ca-certificates curl git pkg-config
 RUN GO=go1.12.4.linux-amd64.tar.gz && curl -sL --retry 10 --retry-delay 60 -O https://dl.google.com/go/$GO && tar -xzf $GO -C /usr/local

@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"github.com/zalando/go-keyring"
 	"time"
 )
 
@@ -10,6 +11,7 @@ var (
 	SqlRepoById = "SELECT * FROM repomodel WHERE id=?"
 	SqlNewRepo = `INSERT INTO repomodel VALUES (NULL, :url, DATETIME('now'), :encryption, 
 					:unique_size, :unique_csize, :total_size, :total_unique_chunks, :extra_borg_arguments)`
+	SqlUpdateRepoStats = `UPDATE repomodel SET total_size = :total_size, unique_size = :unique_size, unique_size = :unique_size, total_unique_chunks = :total_unique_chunks WHERE id = :id`
 )
 
 var SqlRepoSchema = `
@@ -36,4 +38,13 @@ type Repo struct {
 	TotalSize sql.NullInt64 `db:"total_size"`
 	TotalUniqueChunks sql.NullInt64 `db:"total_unique_chunks"`
 	ExtraBorgArguments sql.NullString `db:"extra_borg_arguments"`
+}
+
+func (r *Repo) SetPassword(password string) error {
+	return keyring.Set("vorta-repo", r.Url, password)
+}
+
+func (r *Repo) GetPassword() (password string, err error) {
+	password, err = keyring.Get("vorta-repo", r.Url)
+	return
 }

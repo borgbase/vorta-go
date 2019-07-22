@@ -22,7 +22,7 @@ func (t *ScheduleTab) init() {
 		for k, v := range schedulerRadioMap {
 			if v.IsChecked() {
 				currentProfile.ScheduleMode = k
-				currentProfile.UpdateField("schedule_mode")
+				currentProfile.SaveField("schedule_mode")
 				break
 			}
 		}
@@ -32,11 +32,11 @@ func (t *ScheduleTab) init() {
 
 	t.PreBackupCmdLineEdit.ConnectTextChanged(func(text string) {
 		currentProfile.PreBackupCmd = text
-		currentProfile.UpdateField("pre_backup_cmd")
+		currentProfile.SaveField("pre_backup_cmd")
 	})
 	t.PostBackupCmdLineEdit.ConnectTextChanged(func(text string) {
 		currentProfile.PostBackupCmd = text
-		currentProfile.UpdateField("post_backup_cmd")
+		currentProfile.SaveField("post_backup_cmd")
 	})
 }
 

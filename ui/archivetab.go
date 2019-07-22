@@ -34,11 +34,11 @@ func (w *ArchiveTab) init() {
 
 	w.ArchiveNameTemplate.ConnectTextChanged(func(text string) {
 		currentProfile.NewArchiveName = text
-		currentProfile.UpdateField("new_archive_name")
+		currentProfile.SaveField("new_archive_name")
 	})
 	w.PrunePrefixTemplate.ConnectTextChanged(func(text string) {
 		currentProfile.PrunePrefix = text
-		currentProfile.UpdateField("prune_prefix")
+		currentProfile.SaveField("prune_prefix")
 	})
 }
 

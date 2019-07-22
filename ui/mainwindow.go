@@ -62,10 +62,7 @@ func (w *MainWindow) AddTabs() {
 	w.TabWidget.AddTab(Tabs.ArchiveTab, "Archives")
 	w.TabWidget.AddTab(Tabs.MiscTab, "Misc")
 
-	Tabs.RepoTab.Populate()
-	Tabs.SourceTab.Populate()
-	Tabs.ScheduleTab.Populate()
-	Tabs.ArchiveTab.Populate()
+	w.refreshAllTabs()
 }
 
 func (w *MainWindow) profileSelectorChanged(ix int) {
@@ -73,7 +70,14 @@ func (w *MainWindow) profileSelectorChanged(ix int) {
 	models.DB.Get(currentProfile, models.SqlProfileById, id)
 	models.DB.Get(currentRepo, models.SqlRepoById, currentProfile.RepoId)
 	utils.Log.Error(currentRepo.Url, id)
+	w.refreshAllTabs()
+}
+
+func (w *MainWindow) refreshAllTabs() {
 	Tabs.RepoTab.Populate()
+	Tabs.SourceTab.Populate()
+	Tabs.ScheduleTab.Populate()
+	Tabs.ArchiveTab.Populate()
 }
 
 func (w *MainWindow) displayLogMessage(m string) {
@@ -84,23 +88,22 @@ func (w *MainWindow) displayLogMessage(m string) {
 func (w *MainWindow) RunUIEventHandler(appChan chan utils.VEvent) {
 	for e := range MainWindowChan {
 		switch e.Topic {
-		case "StatusUpdate":
+		case "StatusUpdate":  // TODO: Use enums here.
 			w.displayLogMessage(e.Message)
 		case "ChangeRepo":
 			utils.Log.Info("Repo changed")
 			models.DB.Get(currentRepo, models.SqlRepoById, e.Message)
 			currentProfile.RepoId = currentRepo.Id
 			models.DB.NamedExec(fmt.Sprintf(models.SqlUpdateProfileFieldById, "repo_id"), currentProfile)
-			Tabs.RepoTab.Populate()
-			Tabs.SourceTab.Populate()
-			Tabs.ScheduleTab.Populate()
-			Tabs.ArchiveTab.Populate()
+			w.refreshAllTabs()
 		case "StartBackup":
 			appChan <- e
 		case "OpenMainWindow":
 			w.Show()
 			w.Raise()
 			w.ActivateWindow()
+		case "UpdateArchiveTab":
+			Tabs.ArchiveTab.Populate()
 		default:
 			utils.Log.Info("Unhandled UI Channel Event")
 		}
@@ -113,5 +116,5 @@ func ChooseFileDialog(callback func(files []string)) {
 	fd.SetFileMode(widgets.QFileDialog__AnyFile)
 	fd.SetWindowModality(core.Qt__WindowModal)  //TODO: not working on macOS?
 	fd.ConnectFilesSelected(callback)
-	fd.Exec()
+	fd.Exec()  //TODO: what happens if user cancels?
 }

@@ -16,7 +16,7 @@ var (
 func InitLog() {
 	// Find and create required folders
 	ConfigDir = appdir.New("Vorta")
-	requiredFolders := []string{utils.ConfigDir.UserLogs(), utils.ConfigDir.UserData()}
+	requiredFolders := []string{ConfigDir.UserLogs(), ConfigDir.UserData()}
 	for _, p := range requiredFolders {
 		if _, err := os.Stat(p); os.IsNotExist(err) {
 			err := os.Mkdir(p, os.ModePerm)
@@ -25,7 +25,7 @@ func InitLog() {
 			}
 		}
 	}
-	
+
 	// Set up logging
 	Log = logrus.New()
 	Formatter := new(logrus.TextFormatter)

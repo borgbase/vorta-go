@@ -28,11 +28,6 @@ func (t *RepoTab) init() {
 	t.RepoSelector.AddItem("+ Initialize New Repository", core.NewQVariant1("new"))
 	t.RepoSelector.AddItem("+ Add Existing Repository", core.NewQVariant1("existing"))
 	t.RepoSelector.InsertSeparator(3)
-	rr := []models.Repo{}
-	models.DB.Select(&rr, models.SqlAllRepos)
-	for _, repo := range rr {
-		t.RepoSelector.AddItem(repo.Url, core.NewQVariant1(repo.Id))
-	}
 	t.RepoSelector.ConnectCurrentIndexChanged(t.repoSelectorChanged)
 
 }
@@ -60,6 +55,15 @@ func (t *RepoTab) setStats() {
 }
 
 func (t *RepoTab) Populate() {
+	rr := []models.Repo{}
+	models.DB.Select(&rr, models.SqlAllRepos)
+	for _, repo := range rr {
+		// see if repo already exists, otherwise add it.
+		existingIx := t.RepoSelector.FindData(core.NewQVariant1(repo.Id), int(core.Qt__UserRole), core.Qt__MatchExactly)
+		if existingIx == -1 {
+			t.RepoSelector.AddItem(repo.Url, core.NewQVariant1(repo.Id))
+		}
+	}
 	ix := t.RepoSelector.FindData(core.NewQVariant1(currentRepo.Id), int(core.Qt__UserRole), core.Qt__MatchExactly)
 	t.RepoSelector.SetCurrentIndex(ix)
 
@@ -75,7 +79,8 @@ func (t *RepoTab) repoSelectorChanged(index int) {
 		dialog := NewRepoAddDialog(t)
 		dialog.SetParent2(t, core.Qt__Sheet)
 		dialog.ConnectAccepted(func(){
-			utils.Log.Info("Dialog Accepeted")
+			utils.Log.Info("New repo added.")
+			MainWindowChan <- utils.VEvent{Topic: "ChangeRepo", Message: string(currentRepo.Id)}
 		})
 		dialog.ConnectRejected(func(){
 			utils.Log.Info("Dialog Rejected")
@@ -86,7 +91,9 @@ func (t *RepoTab) repoSelectorChanged(index int) {
 		dialog.UseForExistingRepo()
 		dialog.SetParent2(t, core.Qt__Sheet)
 		dialog.ConnectAccepted(func(){
-			utils.Log.Info("Dialog Accepeted")
+			utils.Log.Info("Existing repo added.")
+			MainWindowChan <- utils.VEvent{Topic: "ChangeRepo", Message: string(currentRepo.Id)}
+
 		})
 		dialog.ConnectRejected(func(){
 			utils.Log.Info("Dialog Rejected")

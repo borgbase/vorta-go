@@ -2,7 +2,9 @@ package ui
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/therecipe/qt/core"
+	"regexp"
 	"vorta-go/borg"
 	"vorta-go/models"
 	"vorta-go/utils"
@@ -14,7 +16,7 @@ var encryptionModes = map[string]string{
 	"keyfile-blake2": "Keyfile-Blake2 (Key stored in home directory)",
 	"keyfile": "Keyfile",
 	"none": "None (not recommended)",
-}
+} // TODO: populate list in order.
 
 func (d *RepoAddDialog) init() {
 	/*
@@ -25,33 +27,49 @@ func (d *RepoAddDialog) init() {
 	        self.chooseLocalFolderButton.clicked.connect(self.choose_local_backup_folder)
 	        self.useRemoteRepoButton.clicked.connect(self.use_remote_repo_action)
 	*/
+	d.TabWidget.SetCurrentIndex(0)
+
 	for k, v := range encryptionModes {
 		d.EncryptionComboBox.AddItem(v, core.NewQVariant1(k))
 	}
-	d.SaveButton.ConnectClicked(func(_ bool) {
-		d.Accept()
-	})
 
+	// d.RepoURL accepts a remote SSH addr or a local folder.
+	// d.UseRemoteRepoButton decides which one is currently used. Default = remote repo
+	d.UseRemoteRepoButton.SetDisabled(true)
+	d.UseRemoteRepoButton.ConnectClicked(d.useRemoteRepoUrl)
+	d.ChooseLocalFolderButton.ConnectClicked(d.setLocalFolder)
+	d.SaveButton.ConnectClicked(d.ProcessNewRepo)
 	d.CloseButton.ConnectClicked(func(_ bool) {
 		d.Close()
 	})
-
-	d.TabWidget.SetCurrentIndex(0)
 }
 
-func (d *RepoAddDialog) Validate() {
-	// Check if URL exists.
-/*
-   if self.is_remote_repo and not re.match(r'.+:.+', self.values['repo_url']):
-       self._set_status(self.tr('Please enter a valid repo URL or select a local path.'))
-       return False
+func (d *RepoAddDialog) Validate() error {
+	isRemoteRepo := !d.UseRemoteRepoButton.IsEnabled()  // This button is disabled when we have a remote repo.
+	isValidRemoteAddr, _ := regexp.MatchString(`.+:.+`, d.RepoURL.Text())
 
-   if self.__class__ == AddRepoWindow:
-       if self.values['encryption'] != 'none':
-           if len(self.values['password']) < 8:
-               self._set_status(self.tr('Please use a longer password.'))
-               return False
- */
+	if isRemoteRepo && !isValidRemoteAddr {
+		return fmt.Errorf("Please enter a valid repo URL or select a local path.")
+	}
+
+	selectedEncryption := d.EncryptionComboBox.CurrentData(int(core.Qt__UserRole)).ToString()
+	if selectedEncryption != "none" && len(d.PasswordLineEdit.Text()) < 8 {
+		return fmt.Errorf("Please use a longer password.")
+	}
+	return nil
+}
+
+func (d *RepoAddDialog) setLocalFolder(_ bool) {
+	ChooseFileDialog(func(files []string) {
+		utils.Log.Info(files)
+		d.RepoURL.SetText(files[0])
+		d.UseRemoteRepoButton.SetDisabled(false)
+	})
+}
+
+func (d *RepoAddDialog) useRemoteRepoUrl(_ bool) {
+	d.UseRemoteRepoButton.SetDisabled(true)
+	d.RepoURL.SetText("")
 }
 
 func (d *RepoAddDialog) DisableInput(isDisabled bool) {
@@ -68,7 +86,53 @@ func (d *RepoAddDialog) UseForExistingRepo() {
 	d.SaveButton.ConnectClicked(d.ProcessExistingRepo)
 }
 
+// TODO: combine similar parts with ProcessExistingRepo(). Move parts to processResult?
+func (d *RepoAddDialog) ProcessNewRepo(_ bool) {
+	err := d.Validate()
+	if err != nil {
+		d.ErrorText.SetText(err.Error())
+		return
+	}
+	b, err := borg.NewInitRun(currentProfile, d.RepoURL.Text(), d.PasswordLineEdit.Text(),
+						      d.ExtraBorgArgumentsLineEdit.Text(), d.EncryptionComboBox.CurrentData(int(core.Qt__UserRole)).ToString())
+	if err != nil {
+		d.ErrorText.SetText(err.Error())
+		return
+	}
+	d.DisableInput(true)
+	go func() {
+		err := b.Run()
+		if err != nil {
+			d.ErrorText.SetText(err.Error())
+			d.DisableInput(false)
+		} else {
+			utils.Log.Info(b.Result)
+			newRepo := models.Repo{
+				Url: d.RepoURL.Text(),
+				Encryption: sql.NullString{d.EncryptionComboBox.CurrentData(int(core.Qt__UserRole)).ToString(), true},
+				ExtraBorgArguments: sql.NullString{d.ExtraBorgArgumentsLineEdit.Text(), true},
+			}
+			rows, err := models.DB.NamedExec(models.SqlNewRepo, newRepo)
+			if err != nil {
+				utils.Log.Error(err)
+			}
+			newRepoId, _ := rows.LastInsertId()
+			newRepo.Id = int(newRepoId)
+			currentRepo = &newRepo
+			currentProfile.RepoId = currentRepo.Id
+			currentProfile.SaveField("repo_id")
+			d.Accept()
+		}
+	}()
+	d.ErrorText.SetText("Setting up new Repository...")
+}
+
 func (d *RepoAddDialog) ProcessExistingRepo(_ bool) {
+	err := d.Validate()
+	if err != nil {
+		d.ErrorText.SetText(err.Error())
+		return
+	}
 	b, err := borg.NewInfoRun(currentProfile, d.RepoURL.Text(), d.PasswordLineEdit.Text(), d.ExtraBorgArgumentsLineEdit.Text())
 	if err != nil {
 		d.ErrorText.SetText(err.Error())
@@ -100,8 +164,7 @@ func (d *RepoAddDialog) ProcessExistingRepo(_ bool) {
 			newRepo.Id = int(newRepoId)
 			currentRepo = &newRepo
 			currentProfile.RepoId = currentRepo.Id
-			currentProfile.UpdateField("repo_id")
-			MainWindowChan <- utils.VEvent{Topic: "ChangeRepo", Message: string(currentRepo.Id)}
+			currentProfile.SaveField("repo_id")
 			d.Accept()
 		}
 	}()

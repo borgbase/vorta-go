@@ -3,13 +3,9 @@ package borg
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/zalando/go-keyring"
+	"fmt"
 	"github.com/bitly/go-simplejson"
 	"io"
-	"fmt"
-	"os/user"
-	"strings"
-	"time"
 	"vorta-go/utils"
 
 	"errors"
@@ -25,26 +21,27 @@ var (
 	AppEventChan chan utils.VEvent
 )
 
-
 type BorgRun struct {
 	Bin *BorgBin
 	CommonBorgArgs []string
 	SubCommand string
 	SubCommandArgs []string
 	Repo *models.Repo
-	RepoPassword string
 	Env []string
 	Profile *models.Profile
 	Result *simplejson.Json
 	PlainTextResult string
 }
 
+// TODO: formatting function to print different log types.
 type BorgLogMessage struct {
-	LogType string `json:"type"`
+	LogType string `json:"type"` //log_message, file_status
 	Message string `json:"message"`
 	Levelname string `json:"levelname"`
 	Name string `json:"name"`
 	Time float32 `json:"time"`
+	Status string `json:"status"`
+	Path string `json:"path"`
 }
 
 func (r *BorgRun) Prepare() error {
@@ -60,19 +57,15 @@ func (r *BorgRun) Prepare() error {
 		return errors.New("Backup is already in progress.")
 	}
 
-	// Set password if not yet defined
-	if r.RepoPassword == "" {
-		secret, err := keyring.Get("vorta-repo", r.Repo.Url)
-		if err != nil {
-			utils.Log.Error(err)
-		} else {
-			r.RepoPassword = secret
-		}
+	// Try to get repo password, else set dummy password to avoid prompt.
+	password, err := r.Repo.GetPassword()
+	if err != nil || password == "" {
+		password = "999"
 	}
 
 	// TODO: deal with BORG_PASSCOMMAND
 	r.Env = os.Environ()
-	r.Env = append(r.Env, fmt.Sprintf("BORG_PASSPHRASE=%s", r.RepoPassword))
+	r.Env = append(r.Env, fmt.Sprintf("BORG_PASSPHRASE=%s", password))
 
 	r.CommonBorgArgs = append(r.CommonBorgArgs, "--info", "--log-json")
 	return nil
@@ -87,6 +80,8 @@ func (r *BorgRun) Run() error {
 		r.Bin.Path,
 		mergedArgs...
 		)
+
+	cmd.Env = r.Env
 
 	var stdOutBuf bytes.Buffer
 	cmd.Stdout = &stdOutBuf
@@ -105,10 +100,15 @@ func (r *BorgRun) Run() error {
 				return
 			}
 			if err != nil {
+				utils.Log.Error(err)
 				continue
 			}
-			AppEventChan <- utils.VEvent{Topic: "StatusUpdate", Message: l.Message}
-			utils.Log.Info(l.Message)
+			if l.LogType == "log_message" {
+				AppEventChan <- utils.VEvent{Topic: "StatusUpdate", Message: l.Message}
+			} else if l.LogType == "file_status" {
+				AppEventChan <- utils.VEvent{Topic: "StatusUpdate", Message: l.Path}
+			}
+			utils.Log.Info(l.Message, l.Path)
 		}
 	}()
 
@@ -120,12 +120,12 @@ func (r *BorgRun) Run() error {
 	err = cmd.Wait()
 	borgProcessSlot.Release(1)
 
-	if err != nil {
+	if err != nil {  // TODO: return code 1 may only mean missing files. https://golang.org/pkg/os/exec/#ExitError
 		utils.Log.Error(err)
 		AppEventChan <- utils.VEvent{Topic: "StatusUpdate", Message: "Borg finished with errors."}
 		return err
 	}
-	AppEventChan <- utils.VEvent{Topic: "StatusUpdate", Message: "Finished Command"}
+	AppEventChan <- utils.VEvent{Topic: "StatusUpdate", Message: "Finished command without errors"}
 
 	// Try to parse json stdout
 	stdOutResult := stdOutBuf.Bytes()
@@ -138,22 +138,6 @@ func (r *BorgRun) Run() error {
 	return nil
 }
 
-func (r *BorgRun) ProcessResult(result map[string]interface{}) {}
-
-func _formatArchiveName(p *models.Profile) string {
-	// Time formatting: https://stackoverflow.com/a/20234207/3983708
-	// TODO: fully support time formatting?
-	timeFormat := "2006-01-02T15:04:05"
-	hostname, _ := os.Hostname()
-	user, _ := user.Current()
-	r := strings.NewReplacer(
-		"{hostname}", hostname,
-		"{profile_id}", string(p.Id),
-		"{profile_slug}", p.Slug(),
-		"{now}", time.Now().Format(timeFormat),
-		"{now:%Y-%m-%dT%H:%M:%S}", time.Now().Format(timeFormat),
-		"{utc_now}", time.Now().UTC().Format(timeFormat),
-		"{user}", user.Username,
-		)
-	return r.Replace(p.NewArchiveName)
+func (r *BorgRun) ProcessResult() {
+	utils.Log.Error("not implemented")
 }

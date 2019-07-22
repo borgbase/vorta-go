@@ -9,13 +9,13 @@ func (t *SourceTab) init() {
 	t.ExcludePatternsField.ConnectTextChanged(func() {
 		currentProfile.ExcludePatterns.String = t.ExcludePatternsField.ToPlainText()
 		currentProfile.ExcludePatterns.Valid = true
-		currentProfile.UpdateField("exclude_patterns")
+		currentProfile.SaveField("exclude_patterns")
 	})
 
 	t.ExcludeIfPresentField.ConnectTextChanged(func() {
 		currentProfile.ExcludeIfPresent.String = t.ExcludeIfPresentField.ToPlainText()
 		currentProfile.ExcludeIfPresent.Valid = true
-		currentProfile.UpdateField("exclude_if_present")
+		currentProfile.SaveField("exclude_if_present")
 	})
 
 	t.SourceAddFile.ConnectClicked(func(_ bool) {
@@ -49,7 +49,9 @@ func (t *SourceTab) Populate() {
 	models.DB.Select(&ss, models.SqlAllSourcesByProfileId, currentProfile.Id)
 	for _, s := range ss {
 		t.SourceFilesWidget.AddItem(s.Dir)
+		utils.Log.Info("Adding item", s.Dir)
 	}
+	t.SourceFilesWidget.Repaint()
 	t.ExcludePatternsField.AppendPlainText(currentProfile.ExcludePatterns.String)
 	t.ExcludeIfPresentField.AppendPlainText(currentProfile.ExcludeIfPresent.String)
 
