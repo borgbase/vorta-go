@@ -31,7 +31,8 @@ RUN find /opt/Qt/Docs -type f ! -name "*.index" -delete
 RUN apt-get -qq update && apt-get --no-install-recommends -qq -y install binutils
 RUN find /opt/Qt/5.13.0/gcc_64 -type f ! -name "*.a" ! -name "*.la" ! -name "*.prl" -name "lib*" -exec strip -s {} \;
 
-
+ENV QT_QMAKE_DIR /opt/Qt/5.13.0/gcc_64/bin
+ENV QT_DIR /opt/Qt/5.13.0/gcc_64
 RUN $GOPATH/bin/qtsetup prep
 RUN $GOPATH/bin/qtsetup check windows
 RUN $GOPATH/bin/qtsetup generate windows

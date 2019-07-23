@@ -28,7 +28,7 @@ require (
 	github.com/therecipe/qt/internal/binding/files/docs/5.8.0 v0.0.0-20190628021130-a9acd1ab63c1 // indirect
 	github.com/therecipe/qt/internal/binding/files/docs/5.9.0 v0.0.0-20190628021130-a9acd1ab63c1 // indirect
 	github.com/zalando/go-keyring v0.0.0-20190715212148-76787ff3b3bd
-	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 // indirect
+	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4
 	golang.org/x/net v0.0.0-20190628185345-da137c7871d7 // indirect
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58
 	golang.org/x/sys v0.0.0-20190712062909-fae7ac547cb7 // indirect

@@ -1,9 +1,11 @@
 package ui
 
 import (
+	"database/sql"
 	"fmt"
 	"github.com/dustin/go-humanize"
 	"github.com/therecipe/qt/core"
+	"github.com/therecipe/qt/widgets"
 	"vorta-go/models"
 	"vorta-go/utils"
 )
@@ -30,6 +32,21 @@ func (t *RepoTab) init() {
 	t.RepoSelector.InsertSeparator(3)
 	t.RepoSelector.ConnectCurrentIndexChanged(t.repoSelectorChanged)
 
+	t.RepoRemoveToolbutton.ConnectClicked(t.unlinkRepo)
+
+	t.SshComboBox.AddItem("Automatically choose SSH Key (default)", core.NewQVariant1(nil))
+
+	/*
+	    def init_ssh(self):
+	        keys = get_private_keys()
+	        self.sshComboBox.clear()
+	        self.sshComboBox.addItem(self.tr('Automatically choose SSH Key (default)'), None)
+	        self.sshComboBox.addItem(self.tr('Create New Key'), 'new')
+	        for key in keys:
+	            self.sshComboBox.addItem(f'{key["filename"]} ({key["format"]})', key['filename'])
+
+	*/
+
 }
 
 func (t *RepoTab) compressionSelectorChanged(ix int) {
@@ -40,6 +57,30 @@ func (t *RepoTab) compressionSelectorChanged(ix int) {
 		utils.Log.Error(err)
 	}
 }
+
+func (t *RepoTab) unlinkRepo(_ bool) {
+	if currentRepo.Id != t.RepoSelector.CurrentData(int(core.Qt__UserRole)).ToInt(nil) {
+		utils.Log.Panic("Not sure which repo to unlink.")
+	}
+	msgBox := widgets.QMessageBox_Question(nil, "Unlink Repo",
+		fmt.Sprintf("Are you sure you want to unlinke the repo %v? This will not remove any data and you can always re-add the repo later.",
+			currentRepo.Url), widgets.QMessageBox__Yes|widgets.QMessageBox__No, 0)
+
+	if msgBox == widgets.QMessageBox__Yes {
+		t.RepoSelector.DisconnectCurrentIndexChanged()
+		utils.Log.Info("Unlinking repo %v", currentRepo.Url)
+		currentRepoId := currentRepo.Id
+		currentRepo = &models.Repo{}
+		currentProfile.RepoId = sql.NullInt64{Valid:false}
+		currentProfile.SaveField("repo_id")
+		models.DB.MustExec(models.SqlRemoveRepoById, currentRepoId)
+		t.RepoSelector.RemoveItem(t.RepoSelector.CurrentIndex())
+		t.RepoSelector.SetCurrentIndex(0)
+		t.RepoSelector.ConnectCurrentIndexChanged(t.repoSelectorChanged)
+	}
+}
+
+
 
 func (t *RepoTab) setCompression() {
 	ix := t.RepoCompression.FindData(core.NewQVariant1(currentProfile.Compression), int(core.Qt__UserRole), core.Qt__MatchExactly)
@@ -65,6 +106,9 @@ func (t *RepoTab) Populate() {
 		}
 	}
 	ix := t.RepoSelector.FindData(core.NewQVariant1(currentRepo.Id), int(core.Qt__UserRole), core.Qt__MatchExactly)
+	if ix < 0 {
+		ix = 0  // if currentRepo is empty, set to first row.
+	}
 	t.RepoSelector.SetCurrentIndex(ix)
 
 	t.setStats()

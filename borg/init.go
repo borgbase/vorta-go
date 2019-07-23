@@ -22,7 +22,7 @@ func NewInitRun(profile *models.Profile, repoUrl, repoPassword, extraBorgArgs, e
 	r.Repo.Url = repoUrl
 	err := r.Repo.SetPassword(repoPassword)
 	if err != nil {
-		return r, err
+		return nil, err
 	}
 
 	err = r.Prepare()

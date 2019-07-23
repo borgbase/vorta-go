@@ -40,7 +40,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="label_2">
+    <widget class="QLabel" name="introTextLabel">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
        <horstretch>0</horstretch>
@@ -54,6 +54,9 @@
      </property>
      <property name="text">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Backup profiles allow for granular backups from different sources to different destinations. You could e.g. back up essential documents to a remote repository via Wifi, while doing a full backup onto a local storage device.&lt;/p&gt;&lt;p&gt;Repositories and SSH keys are shared between profiles. Source folders, active destination repo, allowed networks, pruning, validation and scheduling are per-profile.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
      </property>
      <property name="wordWrap">
       <bool>true</bool>

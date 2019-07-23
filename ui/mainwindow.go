@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"database/sql"
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
 	"vorta-go/models"
@@ -38,11 +39,15 @@ func (w *MainWindow) init() {
 	currentRepo = &models.Repo{}
 	models.DB.Get(currentRepo, models.SqlRepoById, pp[0].RepoId)
 
+
 	w.CreateStartBtn.ConnectClicked(func(_ bool) {
 		utils.Log.Info("clicked start-backup")
 		MainWindowChan <- utils.VEvent{Topic: "StartBackup", Profile: currentProfile}
 	})
 	w.ProfileSelector.ConnectCurrentIndexChanged(w.profileSelectorChanged)
+	w.ProfileAddButton.ConnectClicked(w.addProfile)
+	w.ProfileDeleteButton.ConnectClicked(w.removeProfile)
+	w.ProfileRenameButton.ConnectClicked(w.renameProfile)
 	w.ConnectClose(func() bool {w.Close(); return true})
 	w.Show()
 }
@@ -85,6 +90,59 @@ func (w *MainWindow) displayLogMessage(m string) {
 		w.CreateProgressText.Repaint()
 }
 
+func (w *MainWindow) addProfile(_ bool) {
+	dialog := NewProfileAddDialog(nil)
+	dialog.SetParent2(w, core.Qt__Sheet)
+	dialog.ConnectAccepted(func() {
+		utils.Log.Info("profile added")
+		rows, _ := models.DB.Exec(models.SqlNewProfile, dialog.ProfileNameField.Text())
+		newProfileId, _ := rows.LastInsertId()
+		models.DB.Get(currentProfile, models.SqlProfileById, newProfileId)
+		w.ProfileSelector.AddItem(currentProfile.Name, core.NewQVariant1(currentProfile.Id))
+		ix := w.ProfileSelector.FindData(core.NewQVariant1(currentProfile.Id), int(core.Qt__UserRole),  core.Qt__MatchExactly)
+		w.ProfileSelector.SetCurrentIndex(ix)
+		currentRepo = &models.Repo{}
+		w.refreshAllTabs()
+	})
+	dialog.Show()
+}
+
+func (w *MainWindow) renameProfile(_ bool) {
+	dialog := NewProfileAddDialog(nil)
+	dialog.SetParent2(w, core.Qt__Sheet)
+	dialog.ModalTitle.SetText("Rename Profile")
+	dialog.IntroTextLabel.Hide()
+	dialog.AdjustSize()
+	dialog.ProfileNameField.SetText(currentProfile.Name)
+	dialog.ConnectAccepted(func() {
+		utils.Log.Info("profile renamed")
+		currentProfile.Name = dialog.ProfileNameField.Text()
+		currentProfile.SaveField("name")
+		ix := w.ProfileSelector.FindData(core.NewQVariant1(currentProfile.Id), int(core.Qt__UserRole),  core.Qt__MatchExactly)
+		w.ProfileSelector.SetItemText(ix, currentProfile.Name)
+	})
+	dialog.Show()
+}
+
+func (w *MainWindow) removeProfile (_ bool) {
+	msgBox := widgets.QMessageBox_Question(nil, "Remove Profile",
+		fmt.Sprintf("Are you sure you want to remove the profile %v?",
+			currentProfile.Name), widgets.QMessageBox__Yes|widgets.QMessageBox__No, 0)
+
+	if msgBox == widgets.QMessageBox__Yes {
+		ix := w.ProfileSelector.FindData(core.NewQVariant1(currentProfile.Id), int(core.Qt__UserRole),  core.Qt__MatchExactly)
+		w.ProfileSelector.RemoveItem(ix)
+		models.DB.MustExec(models.SqlRemoveProfileById, currentProfile.Id)
+		var nProfiles int
+		models.DB.Get(&nProfiles, models.SqlCountProfiles)
+		if nProfiles == 0 {
+			rows, _ := models.DB.Exec(models.SqlNewProfile, "Default")
+			newID, _ := rows.LastInsertId()
+			w.ProfileSelector.AddItem("Default", core.NewQVariant1(newID))
+		}
+	}
+}
+
 func (w *MainWindow) RunUIEventHandler(appChan chan utils.VEvent) {
 	for e := range MainWindowChan {
 		switch e.Topic {
@@ -92,9 +150,12 @@ func (w *MainWindow) RunUIEventHandler(appChan chan utils.VEvent) {
 			w.displayLogMessage(e.Message)
 		case "ChangeRepo":
 			utils.Log.Info("Repo changed")
-			models.DB.Get(currentRepo, models.SqlRepoById, e.Message)
-			currentProfile.RepoId = currentRepo.Id
-			models.DB.NamedExec(fmt.Sprintf(models.SqlUpdateProfileFieldById, "repo_id"), currentProfile)
+			err := models.DB.Get(currentRepo, models.SqlRepoById, e.Message)
+			utils.Log.Info("currentRepo val:", currentRepo)
+			if err == nil {
+				currentProfile.RepoId = sql.NullInt64{int64(currentRepo.Id), true}
+				models.DB.NamedExec(fmt.Sprintf(models.SqlUpdateProfileFieldById, "repo_id"), currentProfile)
+			}
 			w.refreshAllTabs()
 		case "StartBackup":
 			appChan <- e

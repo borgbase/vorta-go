@@ -4,6 +4,43 @@ An implementation of [Vorta](https://github.com/borgbase/vorta) in Golang to imp
 
 Work in progress and NOT functional. Use the [Python version](https://github.com/borgbase/vorta) if you need something that works.
 
+## Progress
+
+Borg Commands:
+- [x] `init`
+- [x] `create`
+- [x] `info`
+- [x] `check`
+- [ ] `extract`
+- [ ] `mount`
+- [ ] `delete`
+- [ ] `diff`
+- [ ] `list-archive`
+- [ ] `list-repo`
+- [ ] `prune`
+- [ ] `umount`
+- [ ] `version`
+
+Backend Functionality
+- [x] Keychain/SecretService
+- [ ] Plain text password storage in DB
+- [ ] Read and parse existing SSH keys
+- [ ] Create new SSH key
+- [ ] Check Borg version for available features
+- [x] Background scheduler
+- [ ] Read list of WiFi
+- [ ] Integrate with existing translations
+- [ ] Single App
+- [ ] Tests
+
+Packaging (via Docker)
+- [x] macOS
+- [x] Ubuntu 19.04
+- [ ] Ubuntu 18.04
+- [x] Archlinux
+- [ ] Windows?
+- [ ] Flatpak
+
 ## Development
 
 1. Follow the [official steps](https://github.com/therecipe/qt/wiki/Installation) to set up a Go project in **Module Mode**.

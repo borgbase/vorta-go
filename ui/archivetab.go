@@ -6,6 +6,7 @@ import (
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
 	"time"
+	"vorta-go/borg"
 	"vorta-go/models"
 	"vorta-go/utils"
 )
@@ -40,14 +41,30 @@ func (w *ArchiveTab) init() {
 		currentProfile.PrunePrefix = text
 		currentProfile.SaveField("prune_prefix")
 	})
+
+	w.CheckButton.ConnectClicked(func(_ bool) {
+		r, err := borg.NewCheckRun(currentProfile)
+		if err != nil {
+			w.MountErrors.SetText(err.Error())
+			return
+		}
+		w.MountErrors.SetText("Starting repo check...")
+		go func() {
+			err := r.Run()
+			if err != nil {
+				w.MountErrors.SetText(err.Error())
+			}
+		}()
+	})
 }
 
 func (w *ArchiveTab) Populate() {
 	w.ToolBox.SetItemText(0, fmt.Sprintf("Archives for %s", currentRepo.Url))
 	archives := []models.Archive{}
 	err := models.DB.Select(&archives, models.SqlAllArchivesByRepoId, currentRepo.Id)
-	if err != nil {
+	if err != nil || len(archives) == 0 {
 		utils.Log.Error(err)
+		return
 	}
 	w.ArchiveTable.SetRowCount(len(archives))
 

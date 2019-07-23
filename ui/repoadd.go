@@ -19,14 +19,6 @@ var encryptionModes = map[string]string{
 } // TODO: populate list in order.
 
 func (d *RepoAddDialog) init() {
-	/*
-	    def __init__(self, parent=None):
-	        super().__init__(parent)
-	        self.result = None
-	        self.is_remote_repo = True
-	        self.chooseLocalFolderButton.clicked.connect(self.choose_local_backup_folder)
-	        self.useRemoteRepoButton.clicked.connect(self.use_remote_repo_action)
-	*/
 	d.TabWidget.SetCurrentIndex(0)
 
 	for k, v := range encryptionModes {
@@ -119,7 +111,7 @@ func (d *RepoAddDialog) ProcessNewRepo(_ bool) {
 			newRepoId, _ := rows.LastInsertId()
 			newRepo.Id = int(newRepoId)
 			currentRepo = &newRepo
-			currentProfile.RepoId = currentRepo.Id
+			currentProfile.RepoId = sql.NullInt64{int64(currentRepo.Id), true}
 			currentProfile.SaveField("repo_id")
 			d.Accept()
 		}
@@ -163,7 +155,7 @@ func (d *RepoAddDialog) ProcessExistingRepo(_ bool) {
 			newRepoId, err := rows.LastInsertId()
 			newRepo.Id = int(newRepoId)
 			currentRepo = &newRepo
-			currentProfile.RepoId = currentRepo.Id
+			currentProfile.RepoId = sql.NullInt64{int64(currentRepo.Id), true}
 			currentProfile.SaveField("repo_id")
 			d.Accept()
 		}
