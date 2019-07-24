@@ -66,6 +66,10 @@ For Linux, Qt5 is linked dynamically to match your distro's look and feel. Insta
 - Archlinux: `$ pacman -S qt5`
 - Fedora: `$ yum install qt5-qtbase`
 
+## Translations
+- extract strings: `lupdate -extensions ui ui/*.ui -ts qml/i18n/ui_en.ts` 
+- compile .ts to .qm: `lrelease qml/i18n/ui_de.ts -qm qml/i18n/ui_de.qm`
+
 ## License and Credits
 - Thank you to all the people who already contributed to Vorta: [code](https://github.com/borgbase/vorta/graphs/contributors), [translations](https://github.com/borgbase/vorta/issues/159)
 - Licensed under GPLv3. See [LICENSE.txt](LICENSE.txt) for details.

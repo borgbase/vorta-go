@@ -174,7 +174,7 @@ func (w *MainWindow) RunUIEventHandler(appChan chan utils.VEvent) {
 
 func ChooseFileDialog(callback func(files []string)) {
 	fd := widgets.NewQFileDialog(nil, 0)
-	fd.SetFileMode(widgets.QFileDialog__AnyFile)
+	fd.SetFileMode(widgets.QFileDialog__Directory)
 	fd.SetWindowModality(core.Qt__WindowModal)  //TODO: not working on macOS?
 	fd.ConnectFilesSelected(callback)
 	fd.Exec()  //TODO: what happens if user cancels?

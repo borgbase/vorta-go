@@ -100,7 +100,6 @@ func (r *BorgRun) Run() error {
 				return
 			}
 			if err != nil {
-				utils.Log.Error(err)
 				continue
 			}
 			if l.LogType == "log_message" {

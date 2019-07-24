@@ -1,0 +1,30 @@
+name: "vorta"
+arch: "amd64"
+platform: "linux"
+version: "v0.0.1"
+section: "default"
+priority: "extra"
+provides:
+- vorta
+depends:
+- qt5-default
+- libqt5qml5
+- borgbackup
+maintainer: "Manuel Riel <hello@snapdragon.cc>"
+description: |
+  FooBar is the great foo and bar software.
+    And this can be in multiple lines!
+vendor: "BorgBase"
+homepage: "https://vorta.borgbase.com"
+license: "GPL"
+bindir: "/usr/local/bin"
+files:
+  ./deploy/linux/vorta: "/usr/local/bin/vorta"
+# chromium-codecs-ffmpeg-extra_75.0.3770.90-0ubuntu0.19.04.1_amd64.deb
+# chromium-codecs-ffmpeg-extra_75.0.3770.90-0ubuntu0.18.04.1_i386.deb
+# ffmpeg-doc_3.4.6-0ubuntu0.18.04.1_all.deb
+# ffmpeg_4.1.4-dmo1+deb10u1_amd64.deb
+# ffmpeg-devel-4.1.4-1.fc30.i686.rpm
+
+# distro id from: https://github.com/nir0s/distro/blob/master/distro.py#L137
+# platform and arch from: go tool dist list/https://gist.github.com/asukakenji/f15ba7e588ac42795f421b48b8aede63

@@ -1,11 +1,14 @@
-DISTRO ?= ubuntu_19_04
+DISTRO ?= 0ubuntu0.19.04.1
 .PHONY: darwin linux
 
 
 linux:
-	docker build -f docker/$(DISTRO).Dockerfile -t vorta/$(DISTRO) .
-	ID=$$(docker create vorta/archlinux) && docker cp $$ID:/home/user/vorta/deploy/linux/vorta deploy/linux/vorta-$(DISTRO) && docker rm -v $$ID
-	upx deploy/linux/vorta-$(DISTRO)
+	docker build -f build/docker/$(DISTRO).Dockerfile -t vorta/$(DISTRO) .
+	ID=$$(docker create vorta/$(DISTRO)) && docker cp $$ID:/home/user/vorta/deploy/linux/vorta deploy/linux/vorta && docker rm -v $$ID
+	upx deploy/linux/vorta
+	nfpm -f build/package/nfpm.yaml pkg --target deploy/linux/vorta_v0.0.1-$(DISTRO)_amd64.deb
+	mv deploy/linux/vorta deploy/linux/vorta_v0.0.1-$(DISTRO)_amd64.bin
+
 
 darwin:
 	qtdeploy -uic=false -quickcompiler build

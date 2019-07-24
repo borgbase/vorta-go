@@ -19,9 +19,9 @@ func InitLog() {
 	requiredFolders := []string{ConfigDir.UserLogs(), ConfigDir.UserData()}
 	for _, p := range requiredFolders {
 		if _, err := os.Stat(p); os.IsNotExist(err) {
-			err := os.Mkdir(p, os.ModePerm)
+			err := os.MkdirAll(p, os.ModePerm)
 			if err != nil {
-				panic("Unable to create required folder.")
+				Log.Panicf("error while creating required folder: %v", err)
 			}
 		}
 	}

@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
 	"os"
 	"runtime"
@@ -18,9 +19,20 @@ func InitApp() {
 	QtApp = widgets.NewQApplication(len(os.Args), os.Args)
 	QtApp.SetQuitOnLastWindowClosed(false)
 
+	// TODO: will this prevent proper dark theme? https://www.linuxuprising.com/2018/05/get-qt5-apps-to-use-native-gtk-style-in.html
 	if strings.HasPrefix(runtime.GOOS, "linux") {
 		QtApp.SetStyle2("fusion")
 	}
+
+	// Load translations
+	qtTranslator := core.NewQTranslator(nil)
+	//success := qtTranslator.Load("ui_de", ":/qml/i18n/", "", "") //+core.QLocale_System().Name()
+	success := qtTranslator.Load(":/qml/i18n/ui_de.qm", "", "", "") //+core.QLocale_System().Name()
+	utils.Log.Info("loaded translations:", success)
+	QtApp.InstallTranslator(qtTranslator)
+	utils.Log.Info("translate", QtApp.Tr("Archives", "", 0))
+	utils.Log.Info("translate", QtApp.Translate("ArchiveTab", "Archives", "", 0))
+
 
 	InitTray()
 }

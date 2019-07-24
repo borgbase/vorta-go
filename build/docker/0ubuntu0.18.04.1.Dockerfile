@@ -8,7 +8,9 @@ ENV GOPATH $HOME/work
 ENV PATH /usr/local/go/bin:$PATH
 ENV QT_DOCKER true
 ENV QT_PKG_CONFIG true
+ENV QT_VERSION 5.9.5
 ENV QT_API 5.9.0
+ENV QT_DIR /usr/include/x86_64-linux-gnu/qt5/
 
 RUN apt-get -qq update && apt-get --no-install-recommends -qq -y install ca-certificates curl git pkg-config
 RUN GO=go1.12.4.linux-amd64.tar.gz && curl -sL --retry 10 --retry-delay 60 -O https://dl.google.com/go/$GO && tar -xzf $GO -C /usr/local
@@ -18,6 +20,7 @@ RUN apt-get -qq update && apt-get --no-install-recommends -qq -y install build-e
 RUN apt-get -qq update && apt-get --no-install-recommends -qq -y install libqt*5-dev qt*5-dev qt*5-doc-html && apt-get -qq clean
 RUN apt-get -qq update && apt-get --no-install-recommends -qq -y install build-essential libglib2.0-dev libglu1-mesa-dev libpulse-dev \
 	&& apt-get --no-install-recommends -qq -y install fontconfig libasound2 libegl1-mesa libnss3 libpci3 libxcomposite1 libxcursor1 libxi6 libxrandr2 libxtst6 && apt-get -qq clean && apt-get -qq update && apt-get --no-install-recommends -qq -y install fcitx-frontend-qt5 && apt-get -qq clean
+
 
 RUN $GOPATH/bin/qtsetup prep
 RUN $GOPATH/bin/qtsetup check
