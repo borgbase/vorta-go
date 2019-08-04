@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"github.com/therecipe/qt/gui"
+	"github.com/therecipe/qt/widgets"
 	"io/ioutil"
 	"os/user"
 	"path"
@@ -22,6 +24,13 @@ func isMiscSSHFile(category string) bool {
 func GetSSHDir() (string, error){
 	usr, _ := user.Current()
 	return path.Join(usr.HomeDir, ".ssh"), nil
+}
+
+func CopyPublicKeyToClipboard(publicKeyPath string) {
+	pubSSHKeyBytes, _ := ioutil.ReadFile(publicKeyPath)
+	pubSSHKey := string(pubSSHKeyBytes)
+	app := widgets.NewQApplication(0, nil)
+	app.Clipboard().SetText(pubSSHKey, gui.QClipboard__Clipboard)
 }
 
 func FindSSHKeysInStandardFolder() (keys []string, err error) {

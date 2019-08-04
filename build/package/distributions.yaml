@@ -1,0 +1,14 @@
+---
+product_name: vorta
+releases:
+  - distribution: ubuntu
+    version: 19.04
+    package_name: "{{ product_name }}_{{ version }}-0ubuntu0.19.04.1"
+    depends:
+      - qt5-default
+      - libqt5qml5
+      - borgbackup
+  - distribution: arch
+    version: latest
+    package_name: "{{ product_name }}_{{ version }}-arch"
+    depends: []

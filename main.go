@@ -2,6 +2,8 @@ package main
 
 import (
 	"github.com/therecipe/qt/widgets"
+	"os"
+	"path"
 	"vorta/app"
 	"vorta/borg"
 	"vorta/models"
@@ -11,6 +13,13 @@ import (
 
 func main() {
 	utils.InitLog()
+	pidFile := path.Join(utils.ConfigDir.UserData(), "vorta-go.pid")
+	err := utils.WritePidFile(pidFile)
+	if err != nil {
+		utils.Log.Error("Another instance of Vorta is already running.")
+		os.Exit(1)
+	}
+
 	models.InitDb(utils.ConfigDir.UserData())
 	app.InitApp()
 	app.AppChan = make(chan utils.VEvent)

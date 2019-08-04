@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
+	"vorta/borg"
 	"vorta/models"
 	"vorta/utils"
 )
@@ -164,6 +165,14 @@ func (w *MainWindow) RunUIEventHandler(appChan chan utils.VEvent) {
 			w.ActivateWindow()
 		case "UpdateArchiveTab":
 			Tabs.ArchiveTab.Populate()
+		case "BorgNotFound":
+			w.displayLogMessage("Couldn't find Borg binary.")
+		case "CheckVersion":
+			if !borg.FeatureIsSupported("JSON_LOG") {
+				w.displayLogMessage("Your Borg version is too old.")
+			} else {
+				w.displayLogMessage("Borg binary was found and is ready for use.")
+			}
 		default:
 			utils.Log.Info("Unhandled UI Channel Event")
 		}

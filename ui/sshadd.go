@@ -2,9 +2,6 @@ package ui
 
 import (
 	"github.com/therecipe/qt/core"
-	"github.com/therecipe/qt/gui"
-	"github.com/therecipe/qt/widgets"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
@@ -58,10 +55,7 @@ func (d *SshAddDialog) generateKey(_ bool) {
 		utils.Log.Error(err)
 		return
 	}
-	pubSSHKeyBytes, _ := ioutil.ReadFile(keyPath+".pub")
-	pubSSHKey := string(pubSSHKeyBytes)
-	app := widgets.NewQApplication(0, nil)
-	app.Clipboard().SetText(pubSSHKey, gui.QClipboard__Clipboard)
+	utils.CopyPublicKeyToClipboard(keyPath+".pub")
 	d.Errors.SetText("New key was copied to clipboard and written to " + keyPath)
 }
 

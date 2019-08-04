@@ -10,6 +10,7 @@ require (
 	github.com/godbus/dbus v4.1.0+incompatible // indirect
 	github.com/gopherjs/gopherjs v0.0.0-20190430165422-3e4dfb77656c // indirect
 	github.com/gosimple/slug v1.5.0
+	github.com/hashicorp/go-version v1.2.0
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/mattn/go-sqlite3 v1.10.0
 	github.com/rainycape/unidecode v0.0.0-20150907023854-cb7f23ec59be // indirect
@@ -28,7 +29,7 @@ require (
 	github.com/therecipe/qt/internal/binding/files/docs/5.8.0 v0.0.0-20190628021130-a9acd1ab63c1 // indirect
 	github.com/therecipe/qt/internal/binding/files/docs/5.9.0 v0.0.0-20190628021130-a9acd1ab63c1 // indirect
 	github.com/zalando/go-keyring v0.0.0-20190715212148-76787ff3b3bd
-	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4
+	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 // indirect
 	golang.org/x/net v0.0.0-20190628185345-da137c7871d7 // indirect
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58
 	golang.org/x/sys v0.0.0-20190712062909-fae7ac547cb7 // indirect

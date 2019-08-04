@@ -19,7 +19,7 @@ darwin:
 	QT_HOMEBREW=true qtdeploy -uic=false -quickcompiler -ldflags '-X vorta/ui.version=${VERSION}' build
 	xattr -cr deploy/darwin/vorta-go.app
 	codesign -f --deep --sign 'Developer ID Application: Manuel Riel (CNMSCAXT48)' deploy/darwin/vorta-go.app
-	sleep 2; appdmg appdmg.json deploy/darwin/vorta-go.dmg
+	sleep 2; appdmg appdmg.json deploy/darwin/vorta-${VERSION}.dmg
 
 test:
 	QT_HOMEBREW=true qtdeploy -uic=false -quickcompiler -ldflags '-X vorta/ui.version=${VERSION}' test

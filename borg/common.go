@@ -57,8 +57,14 @@ func (r *BorgRun) Prepare() error {
 	}
 
 	// Try to get repo password, else set dummy password to avoid prompt.
-	password, err := r.Repo.GetPassword()
-	if err != nil || password == "" {
+	var password string
+	var passwordError error
+	if r.Repo != nil {
+		password, passwordError = r.Repo.GetPassword()
+	} else {
+		passwordError = errors.New("Repo not defined.")
+	}
+	if passwordError != nil || password == "" {
 		password = "999"
 	}
 

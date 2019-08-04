@@ -6,6 +6,8 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
+	"os"
+	"path"
 	"vorta/models"
 	"vorta/utils"
 )
@@ -37,6 +39,8 @@ func (t *RepoTab) init() {
 	t.SshComboBox.AddItem("Automatically choose SSH Key (default)", core.NewQVariant1(nil))
 	t.SshComboBox.AddItem("Create new SSH Key", core.NewQVariant1("new"))
 	t.SshComboBox.ConnectCurrentIndexChanged(t.sshSelectorChanged)
+
+	t.SshKeyToClipboardButton.ConnectClicked(t.sshCopyToClipboard)
 }
 
 func (t *RepoTab) compressionSelectorChanged(ix int) {
@@ -133,6 +137,22 @@ func (t *RepoTab) sshSelectorChanged(index int) {
 		})
 		dialog.Show()
 	}
+}
+
+func (t *RepoTab) sshCopyToClipboard(_ bool) {
+	keyName := t.SshComboBox.CurrentData(int(core.Qt__UserRole)).ToString()
+	sshDir, _ := utils.GetSSHDir()
+	keyFullPath := path.Join(sshDir, keyName+".pub")
+	if _, err := os.Stat(keyFullPath); err != nil {
+		widgets.QMessageBox_Critical(nil,
+			"Public key not found.", fmt.Sprintf("Didn't find the public key for %v.", keyFullPath),
+			widgets.QMessageBox__Ok, widgets.QMessageBox__Ok)
+		return
+	}
+	utils.CopyPublicKeyToClipboard(keyFullPath)
+	widgets.QMessageBox_Information(nil,
+		"Public key copied to clipboard", fmt.Sprintf("The public key part of %v was copied to the clipboard.", keyFullPath),
+		widgets.QMessageBox__Ok, widgets.QMessageBox__Ok)
 }
 
 func (t *RepoTab) repoSelectorChanged(index int) {

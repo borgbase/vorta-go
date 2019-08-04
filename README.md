@@ -19,17 +19,18 @@ Borg Commands:
 - [ ] `list-repo`
 - [ ] `prune`
 - [ ] `umount`
-- [ ] `version`
+- [x] `version`
 
 Backend Functionality
 - [x] Keychain/SecretService
 - [x] Background scheduler
-- [ ] Single App
-- [ ] Read and parse existing SSH keys
-- [ ] Create new SSH key
-- [ ] Check Borg version for available features
+- [x] Single App
+- [ ] Backup status (icon, menu)
+- [x] Read and parse existing SSH keys
+- [x] Create new SSH key
+- [x] Check Borg version for available features
 - [ ] Tests
-- [ ] Read list of WiFi
+- [ ] Read list of WiFis
 - [ ] Password fallback in database
 - [ ] Translations
 

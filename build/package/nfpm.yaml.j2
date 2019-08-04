@@ -1,7 +1,7 @@
-name: "vorta"
+name: "{{ product_name }}"
 arch: "amd64"
-platform: "linux"
-version: "v0.0.1"
+platform: "{{ platform }}"
+version: "{{ version }}"
 section: "default"
 priority: "extra"
 provides:
@@ -12,9 +12,8 @@ depends:
 - borgbackup
 maintainer: "Manuel Riel <hello@snapdragon.cc>"
 description: |
-  FooBar is the great foo and bar software.
-    And this can be in multiple lines!
-vendor: "BorgBase"
+  Vorta is a graphical frontend for Borg Backup.
+vendor: "iViveLabs Ltd."
 homepage: "https://vorta.borgbase.com"
 license: "GPL"
 bindir: "/usr/local/bin"
