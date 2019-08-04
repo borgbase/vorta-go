@@ -10,7 +10,7 @@ import (
 )
 
 type BorgBin struct {
-	Path string
+	Path    string
 	Version string
 }
 
@@ -26,7 +26,7 @@ func NewBorgBin() (*BorgBin, error) {
 	// Check in Resources folder (macOS)
 	ex, err := os.Executable()
 	dir := filepath.Dir(ex)
-	resourceBin := path.Join (filepath.Dir(dir), "Resources", "borg")
+	resourceBin := path.Join(filepath.Dir(dir), "Resources", "borg")
 	if _, err := os.Stat(resourceBin); err == nil {
 		return &BorgBin{Path: resourceBin}, nil
 	} else {
@@ -34,4 +34,3 @@ func NewBorgBin() (*BorgBin, error) {
 	}
 	return nil, errors.New("Couldn't find borg binary to use.")
 }
-

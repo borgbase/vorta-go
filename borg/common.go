@@ -15,33 +15,32 @@ import (
 	"vorta-go/models"
 )
 
-
 var (
 	borgProcessSlot = semaphore.NewWeighted(1)
-	AppEventChan chan utils.VEvent
+	AppEventChan    chan utils.VEvent
 )
 
 type BorgRun struct {
-	Bin *BorgBin
-	CommonBorgArgs []string
-	SubCommand string
-	SubCommandArgs []string
-	Repo *models.Repo
-	Env []string
-	Profile *models.Profile
-	Result *simplejson.Json
+	Bin             *BorgBin
+	CommonBorgArgs  []string
+	SubCommand      string
+	SubCommandArgs  []string
+	Repo            *models.Repo
+	Env             []string
+	Profile         *models.Profile
+	Result          *simplejson.Json
 	PlainTextResult string
 }
 
 // TODO: formatting function to print different log types.
 type BorgLogMessage struct {
-	LogType string `json:"type"` //log_message, file_status
-	Message string `json:"message"`
-	Levelname string `json:"levelname"`
-	Name string `json:"name"`
-	Time float32 `json:"time"`
-	Status string `json:"status"`
-	Path string `json:"path"`
+	LogType   string  `json:"type"` //log_message, file_status
+	Message   string  `json:"message"`
+	Levelname string  `json:"levelname"`
+	Name      string  `json:"name"`
+	Time      float32 `json:"time"`
+	Status    string  `json:"status"`
+	Path      string  `json:"path"`
 }
 
 func (r *BorgRun) Prepare() error {
@@ -71,15 +70,14 @@ func (r *BorgRun) Prepare() error {
 	return nil
 }
 
-
 func (r *BorgRun) Run() error {
 	mergedArgs := append(r.CommonBorgArgs, r.SubCommand)
 	mergedArgs = append(mergedArgs, r.SubCommandArgs...)
 	utils.Log.Info("Running command: ", r.Bin.Path, mergedArgs)
 	cmd := exec.Command(
 		r.Bin.Path,
-		mergedArgs...
-		)
+		mergedArgs...,
+	)
 
 	cmd.Env = r.Env
 
@@ -119,7 +117,7 @@ func (r *BorgRun) Run() error {
 	err = cmd.Wait()
 	borgProcessSlot.Release(1)
 
-	if err != nil {  // TODO: return code 1 may only mean missing files. https://golang.org/pkg/os/exec/#ExitError
+	if err != nil { // TODO: return code 1 may only mean missing files. https://golang.org/pkg/os/exec/#ExitError
 		utils.Log.Error(err)
 		AppEventChan <- utils.VEvent{Topic: "StatusUpdate", Message: "Borg finished with errors."}
 		return err
@@ -128,7 +126,7 @@ func (r *BorgRun) Run() error {
 
 	// Try to parse json stdout
 	stdOutResult := stdOutBuf.Bytes()
-	r.Result, err= simplejson.NewJson(stdOutResult)
+	r.Result, err = simplejson.NewJson(stdOutResult)
 	if err != nil {
 		utils.Log.Error("Failed parsing JSON.", err)
 		r.PlainTextResult = string(stdOutResult)

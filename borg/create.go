@@ -30,8 +30,8 @@ func NewCreateRun(profile *models.Profile) (*CreateRun, error) {
 	excludePatterns := []string{}
 	excludeString := r.Profile.ExcludePatterns.String
 	if excludeString != "" {
-		lines := strings.Split(excludeString,`\n`)
-		for  _, l := range lines {
+		lines := strings.Split(excludeString, `\n`)
+		for _, l := range lines {
 			l = strings.TrimSpace(l)
 			excludePatterns = append(excludePatterns, l)
 		}

@@ -1,6 +1,11 @@
-DISTRO ?= 0ubuntu0.19.04.1
+OUT := vorta
+PKG := gitlab.com/group/project
+VERSION := $(shell git describe --always --long --dirty)
+DISTRO ?= ubuntu-19.04
+
 .PHONY: darwin linux
 
+all: test
 
 linux:
 	docker build -f build/docker/$(DISTRO).Dockerfile -t vorta/$(DISTRO) .
@@ -11,7 +16,10 @@ linux:
 
 
 darwin:
-	qtdeploy -uic=false -quickcompiler build
+	QT_HOMEBREW=true qtdeploy -uic=false -quickcompiler -ldflags="-X main.version=${VERSION}" build
 	xattr -cr deploy/darwin/vorta-go.app
 	codesign -f --deep --sign 'Developer ID Application: Manuel Riel (CNMSCAXT48)' deploy/darwin/vorta-go.app
 	sleep 2; appdmg appdmg.json deploy/darwin/vorta-go.dmg
+
+test:
+	qtdeploy -uic=false -quickcompiler -ldflags="-X main.version=${VERSION}" test

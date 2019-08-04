@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	AppChan   chan utils.VEvent
-	QtApp	  *widgets.QApplication
+	AppChan chan utils.VEvent
+	QtApp   *widgets.QApplication
 )
 
 func InitApp() {
@@ -26,13 +26,11 @@ func InitApp() {
 
 	// Load translations
 	qtTranslator := core.NewQTranslator(nil)
-	//success := qtTranslator.Load("ui_de", ":/qml/i18n/", "", "") //+core.QLocale_System().Name()
-	success := qtTranslator.Load(":/qml/i18n/ui_de.qm", "", "", "") //+core.QLocale_System().Name()
+	success := qtTranslator.Load("ui_de", ":/qml/i18n/", "", "") //+core.QLocale_System().Name()
+	//success := qtTranslator.Load(":/qml/i18n/ui_de.qm", "", "", "") //+core.QLocale_System().Name()
+	//success := qtTranslator.Load2(core.NewQLocale2("de"), "ui_de", "", ":/qml/i18n/", "")
 	utils.Log.Info("loaded translations:", success)
 	QtApp.InstallTranslator(qtTranslator)
-	utils.Log.Info("translate", QtApp.Tr("Archives", "", 0))
-	utils.Log.Info("translate", QtApp.Translate("ArchiveTab", "Archives", "", 0))
-
 
 	InitTray()
 }

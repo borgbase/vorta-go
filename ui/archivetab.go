@@ -71,7 +71,7 @@ func (w *ArchiveTab) Populate() {
 	for row, archive := range archives {
 		w.ArchiveTable.SetItem(row, 0, widgets.NewQTableWidgetItem2(archive.CreatedAt.Format(_timeFormat), 0))
 		w.ArchiveTable.SetItem(row, 1, widgets.NewQTableWidgetItem2(humanize.Bytes(uint64(archive.Size.Int64)), 0))
-		formattedDuration := time.Duration(archive.Duration.Float64)*time.Second
+		formattedDuration := time.Duration(archive.Duration.Float64) * time.Second
 		w.ArchiveTable.SetItem(row, 2, widgets.NewQTableWidgetItem2(formattedDuration.String(), 0))
 		w.ArchiveTable.SetItem(row, 3, widgets.NewQTableWidgetItem2("", 0))
 		w.ArchiveTable.SetItem(row, 4, widgets.NewQTableWidgetItem2(archive.Name, 0))

@@ -7,8 +7,8 @@ import (
 )
 
 type SchedulerCls struct {
-	Cron *cron.Cron
-	AppChan chan VEvent
+	Cron           *cron.Cron
+	AppChan        chan VEvent
 	IdToProfileMap map[int]cron.EntryID
 }
 
@@ -16,8 +16,8 @@ var Scheduler *SchedulerCls
 
 func InitScheduler(ac chan VEvent) {
 	Scheduler = &SchedulerCls{
-		AppChan: ac,
-		Cron: cron.New(),
+		AppChan:        ac,
+		Cron:           cron.New(),
 		IdToProfileMap: make(map[int]cron.EntryID),
 	}
 	Scheduler.ReloadJobs()
@@ -65,7 +65,7 @@ func (s *SchedulerCls) NextTimeForProfile(profileId int) string {
 			return e.Next.Format("2006-01-02 15:04")
 		}
 	}
-	return "None scheduled"  //TODO: could be more elegant
+	return "None scheduled" //TODO: could be more elegant
 }
 
 type VortaJob struct {

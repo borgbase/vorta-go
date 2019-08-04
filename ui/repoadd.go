@@ -12,10 +12,10 @@ import (
 
 var encryptionModes = map[string]string{
 	"repokey-blake2": "Repokey-Blake2 (Recommended, key stored in repository)",
-	"repokey": "Repokey",
+	"repokey":        "Repokey",
 	"keyfile-blake2": "Keyfile-Blake2 (Key stored in home directory)",
-	"keyfile": "Keyfile",
-	"none": "None (not recommended)",
+	"keyfile":        "Keyfile",
+	"none":           "None (not recommended)",
 } // TODO: populate list in order.
 
 func (d *RepoAddDialog) init() {
@@ -37,7 +37,7 @@ func (d *RepoAddDialog) init() {
 }
 
 func (d *RepoAddDialog) Validate() error {
-	isRemoteRepo := !d.UseRemoteRepoButton.IsEnabled()  // This button is disabled when we have a remote repo.
+	isRemoteRepo := !d.UseRemoteRepoButton.IsEnabled() // This button is disabled when we have a remote repo.
 	isValidRemoteAddr, _ := regexp.MatchString(`.+:.+`, d.RepoURL.Text())
 
 	if isRemoteRepo && !isValidRemoteAddr {
@@ -86,7 +86,7 @@ func (d *RepoAddDialog) ProcessNewRepo(_ bool) {
 		return
 	}
 	b, err := borg.NewInitRun(currentProfile, d.RepoURL.Text(), d.PasswordLineEdit.Text(),
-						      d.ExtraBorgArgumentsLineEdit.Text(), d.EncryptionComboBox.CurrentData(int(core.Qt__UserRole)).ToString())
+		d.ExtraBorgArgumentsLineEdit.Text(), d.EncryptionComboBox.CurrentData(int(core.Qt__UserRole)).ToString())
 	if err != nil {
 		d.ErrorText.SetText(err.Error())
 		return
@@ -100,8 +100,8 @@ func (d *RepoAddDialog) ProcessNewRepo(_ bool) {
 		} else {
 			utils.Log.Info(b.Result)
 			newRepo := models.Repo{
-				Url: d.RepoURL.Text(),
-				Encryption: sql.NullString{d.EncryptionComboBox.CurrentData(int(core.Qt__UserRole)).ToString(), true},
+				Url:                d.RepoURL.Text(),
+				Encryption:         sql.NullString{d.EncryptionComboBox.CurrentData(int(core.Qt__UserRole)).ToString(), true},
 				ExtraBorgArguments: sql.NullString{d.ExtraBorgArgumentsLineEdit.Text(), true},
 			}
 			rows, err := models.DB.NamedExec(models.SqlNewRepo, newRepo)
@@ -139,12 +139,12 @@ func (d *RepoAddDialog) ProcessExistingRepo(_ bool) {
 		} else {
 			utils.Log.Info(b.Result)
 			newRepo := models.Repo{
-				Url: d.RepoURL.Text(),
-				Encryption: sql.NullString{b.Result.GetPath("encryption", "mode").MustString(), true},
-				UniqueSize: sql.NullInt64{b.Result.GetPath("cache", "stats", "unique_size").MustInt64(), true},
-				UniqueCsize: sql.NullInt64{b.Result.GetPath("cache", "stats", "unique_csize").MustInt64(), true},
-				TotalSize: sql.NullInt64{b.Result.GetPath("cache", "stats", "total_size").MustInt64(), true},
-				TotalUniqueChunks: sql.NullInt64{b.Result.GetPath("cache", "stats", "total_unique_chunks").MustInt64(), true},
+				Url:                d.RepoURL.Text(),
+				Encryption:         sql.NullString{b.Result.GetPath("encryption", "mode").MustString(), true},
+				UniqueSize:         sql.NullInt64{b.Result.GetPath("cache", "stats", "unique_size").MustInt64(), true},
+				UniqueCsize:        sql.NullInt64{b.Result.GetPath("cache", "stats", "unique_csize").MustInt64(), true},
+				TotalSize:          sql.NullInt64{b.Result.GetPath("cache", "stats", "total_size").MustInt64(), true},
+				TotalUniqueChunks:  sql.NullInt64{b.Result.GetPath("cache", "stats", "total_unique_chunks").MustInt64(), true},
 				ExtraBorgArguments: sql.NullString{d.ExtraBorgArgumentsLineEdit.Text(), true},
 			}
 			rows, err := models.DB.NamedExec(models.SqlNewRepo, newRepo)

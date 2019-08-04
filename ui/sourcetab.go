@@ -30,7 +30,7 @@ func (t *SourceTab) init() {
 			}
 		})
 	})
-	
+
 	t.SourceRemove.ConnectClicked(func(_ bool) {
 		item := t.SourceFilesWidget.TakeItem(t.SourceFilesWidget.CurrentRow())
 		utils.Log.Info(item.Text())
@@ -41,7 +41,7 @@ func (t *SourceTab) init() {
 func (t *SourceTab) Populate() {
 	t.ExcludeIfPresentField.Clear()
 	t.ExcludePatternsField.Clear()
-	for i := t.SourceFilesWidget.Count(); i >= 0; i-- {  // Clear() didn't work.
+	for i := t.SourceFilesWidget.Count(); i >= 0; i-- { // Clear() didn't work.
 		t.SourceFilesWidget.TakeItem(i)
 	}
 
@@ -56,5 +56,3 @@ func (t *SourceTab) Populate() {
 	t.ExcludeIfPresentField.AppendPlainText(currentProfile.ExcludeIfPresent.String)
 
 }
-
-

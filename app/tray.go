@@ -44,8 +44,8 @@ func (t *systemTray) drawMenu() {
 	models.DB.Select(&pp, models.SqlAllProfiles)
 	for _, p := range pp {
 		profileName := p.Name
-		profileMenu.AddAction(p.Name).ConnectTriggered(func(checked bool) {utils.Log.Info("Would backup profile", profileName)})
+		profileMenu.AddAction(p.Name).ConnectTriggered(func(checked bool) { utils.Log.Info("Would backup profile", profileName) })
 	}
 
-	t.menu.AddAction("Quit").ConnectTriggered(func(checked bool) {QtApp.Quit()})
+	t.menu.AddAction("Quit").ConnectTriggered(func(checked bool) { QtApp.Quit() })
 }

@@ -28,3 +28,4 @@ files:
 
 # distro id from: https://github.com/nir0s/distro/blob/master/distro.py#L137
 # platform and arch from: go tool dist list/https://gist.github.com/asukakenji/f15ba7e588ac42795f421b48b8aede63
+# vorta-go_0.02-0ubuntu0.19.04.1_amd64.deb

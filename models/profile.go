@@ -2,22 +2,22 @@ package models
 
 import (
 	"database/sql"
+	"fmt"
 	"os"
 	"os/user"
 	"strings"
 	"time"
-	"fmt"
 
 	"github.com/gosimple/slug"
 )
 
 var (
-	SqlAllProfiles = "SELECT * FROM backupprofilemodel ORDER BY name ASC"
-	SqlProfileById = "SELECT * FROM backupprofilemodel WHERE id=?"
-	SqlCountProfiles = "SELECT count(*) from backupprofilemodel"
-	SqlRemoveProfileById = `DELETE FROM backupprofilemodel WHERE id=?`
+	SqlAllProfiles            = "SELECT * FROM backupprofilemodel ORDER BY name ASC"
+	SqlProfileById            = "SELECT * FROM backupprofilemodel WHERE id=?"
+	SqlCountProfiles          = "SELECT count(*) from backupprofilemodel"
+	SqlRemoveProfileById      = `DELETE FROM backupprofilemodel WHERE id=?`
 	SqlUpdateProfileFieldById = `UPDATE backupprofilemodel SET %[1]v = :%[1]v WHERE id = :id;`
-    SqlNewProfile = `INSERT INTO "backupprofilemodel"
+	SqlNewProfile             = `INSERT INTO "backupprofilemodel"
 					  VALUES (NULL, ?, (DATETIME('now')), NULL, NULL, 'zstd,3', '*/.DS_Store', '.nobackup', 
 							  'off', 1, 24, 17, 54, 1, 3, 0, 2, 7, 4, 6, 2, '', '{hostname}__{profile_slug}-{now}', 
 							  '{hostname}-{profile_slug}-', '', ''
@@ -25,36 +25,36 @@ var (
 )
 
 type Profile struct {
-	Id int
-	Name string
-	AddedAt time.Time `db:"added_at"`
-	RepoId sql.NullInt64 `db:"repo_id"`
-	SSHKey sql.NullString `db:"ssh_key"`
-	Compression string
-	ExcludePatterns sql.NullString `db:"exclude_patterns"`
+	Id               int
+	Name             string
+	AddedAt          time.Time      `db:"added_at"`
+	RepoId           sql.NullInt64  `db:"repo_id"`
+	SSHKey           sql.NullString `db:"ssh_key"`
+	Compression      string
+	ExcludePatterns  sql.NullString `db:"exclude_patterns"`
 	ExcludeIfPresent sql.NullString `db:"exclude_if_present"`
 
-	ScheduleMode string `db:"schedule_mode"`
-	ScheduleIntervalHours int `db:"schedule_interval_hours"`
-	ScheduleIntervalMinutes int `db:"schedule_interval_minutes"`
-	ScheduleFixedHour int `db:"schedule_fixed_hour"`
-	ScheduleFixedMinute int `db:"schedule_fixed_minute"`
+	ScheduleMode            string `db:"schedule_mode"`
+	ScheduleIntervalHours   int    `db:"schedule_interval_hours"`
+	ScheduleIntervalMinutes int    `db:"schedule_interval_minutes"`
+	ScheduleFixedHour       int    `db:"schedule_fixed_hour"`
+	ScheduleFixedMinute     int    `db:"schedule_fixed_minute"`
 
-	ValidationOn bool `db:"validation_on"`
-	ValidationWeeks int `db:"validation_weeks"`
+	ValidationOn    bool `db:"validation_on"`
+	ValidationWeeks int  `db:"validation_weeks"`
 
-	PruneOn bool `db:"prune_on"`
-	PruneHour int `db:"prune_hour"`
-	PruneDay int `db:"prune_day"`
-	PruneWeek int `db:"prune_week"`
-	PruneMonth int `db:"prune_month"`
-	PruneYear int `db:"prune_year"`
+	PruneOn         bool           `db:"prune_on"`
+	PruneHour       int            `db:"prune_hour"`
+	PruneDay        int            `db:"prune_day"`
+	PruneWeek       int            `db:"prune_week"`
+	PruneMonth      int            `db:"prune_month"`
+	PruneYear       int            `db:"prune_year"`
 	PruneKeepWithin sql.NullString `db:"prune_keep_within"`
 
 	NewArchiveName string `db:"new_archive_name"`
-	PrunePrefix string `db:"prune_prefix"`
-	PreBackupCmd string `db:"pre_backup_cmd"`
-	PostBackupCmd string `db:"post_backup_cmd"`
+	PrunePrefix    string `db:"prune_prefix"`
+	PreBackupCmd   string `db:"pre_backup_cmd"`
+	PostBackupCmd  string `db:"post_backup_cmd"`
 }
 
 func (p *Profile) GetRepo() *Repo {
@@ -97,7 +97,6 @@ func (p *Profile) FormatArchiveName() string {
 	}
 }
 
-
 var SqlProfileSchema = `
 CREATE TABLE IF NOT EXISTS "backupprofilemodel"
   (
@@ -130,4 +129,3 @@ CREATE TABLE IF NOT EXISTS "backupprofilemodel"
      FOREIGN KEY ("repo_id") REFERENCES "repomodel" ("id")
   );
 `
-

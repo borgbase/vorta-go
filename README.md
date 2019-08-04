@@ -23,23 +23,23 @@ Borg Commands:
 
 Backend Functionality
 - [x] Keychain/SecretService
-- [ ] Plain text password storage in DB
+- [x] Background scheduler
+- [ ] Single App
 - [ ] Read and parse existing SSH keys
 - [ ] Create new SSH key
 - [ ] Check Borg version for available features
-- [x] Background scheduler
-- [ ] Read list of WiFi
-- [ ] Integrate with existing translations
-- [ ] Single App
 - [ ] Tests
+- [ ] Read list of WiFi
+- [ ] Password fallback in database
+- [ ] Translations
 
 Packaging (via Docker)
 - [x] macOS
 - [x] Ubuntu 19.04
-- [ ] Ubuntu 18.04
+- [ ] Debian 10
+- [ ] Fedora 30
 - [x] Archlinux
 - [ ] Windows?
-- [ ] Flatpak
 
 ## Development
 
@@ -67,7 +67,8 @@ For Linux, Qt5 is linked dynamically to match your distro's look and feel. Insta
 - Fedora: `$ yum install qt5-qtbase`
 
 ## Translations
-- extract strings: `lupdate -extensions ui ui/*.ui -ts qml/i18n/ui_en.ts` 
+- extract strings: `lupdate -extensions ui ui/*.ui -ts qml/i18n/ui_en.ts`
+- merge .ts files: `lconvert -i primary.ts secondary.ts -o complete.ts` 
 - compile .ts to .qm: `lrelease qml/i18n/ui_de.ts -qm qml/i18n/ui_de.qm`
 
 ## License and Credits

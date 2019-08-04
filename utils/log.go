@@ -35,7 +35,7 @@ func InitLog() {
 	// TODO: make cli argument
 	Log.SetLevel(logrus.DebugLevel)
 
-	logFile, err := os.OpenFile(path.Join(ConfigDir.UserLogs(), "vorta-go.log"), os.O_WRONLY | os.O_CREATE, 0755)
+	logFile, err := os.OpenFile(path.Join(ConfigDir.UserLogs(), "vorta-go.log"), os.O_WRONLY|os.O_CREATE, 0755)
 	if err != nil {
 		Log.Panic("Can't open log file.")
 	}

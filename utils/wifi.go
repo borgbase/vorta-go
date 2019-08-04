@@ -1,9 +1,9 @@
 package utils
 
 import (
+	"fmt"
 	"howett.net/plist"
 	"os"
-	"fmt"
 )
 
 const wifiPlist = "/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist"
@@ -31,4 +31,3 @@ func UpdateWifiList() {
 	fmt.Println(data)
 
 }
-

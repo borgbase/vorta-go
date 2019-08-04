@@ -9,4 +9,3 @@ CREATE TABLE "wifisettingmodel" (
   "profile_id" integer NOT NULL,
   FOREIGN KEY ("profile_id") REFERENCES "backupprofilemodel" ("id")
 )`
-

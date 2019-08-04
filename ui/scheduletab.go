@@ -12,9 +12,9 @@ func (t *ScheduleTab) init() {
 	t.ToolBox.SetCurrentIndex(0)
 
 	schedulerRadioMap = map[string]*widgets.QRadioButton{
-		"off": t.ScheduleOffRadio,
+		"off":      t.ScheduleOffRadio,
 		"interval": t.ScheduleIntervalRadio,
-		"fixed": t.ScheduleFixedRadio,
+		"fixed":    t.ScheduleFixedRadio,
 	}
 
 	t.ScheduleApplyButton.ConnectClicked(func(_ bool) {

@@ -1,8 +1,8 @@
 package ui
 
 import (
-	"fmt"
 	"database/sql"
+	"fmt"
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
 	"vorta-go/models"
@@ -10,11 +10,11 @@ import (
 )
 
 type MainWindowTabs struct {
-	RepoTab *RepoTab
-	SourceTab *SourceTab
+	RepoTab     *RepoTab
+	SourceTab   *SourceTab
 	ScheduleTab *ScheduleTab
-	ArchiveTab *ArchiveTab
-	MiscTab *MiscTab
+	ArchiveTab  *ArchiveTab
+	MiscTab     *MiscTab
 }
 
 var (
@@ -39,7 +39,6 @@ func (w *MainWindow) init() {
 	currentRepo = &models.Repo{}
 	models.DB.Get(currentRepo, models.SqlRepoById, pp[0].RepoId)
 
-
 	w.CreateStartBtn.ConnectClicked(func(_ bool) {
 		utils.Log.Info("clicked start-backup")
 		MainWindowChan <- utils.VEvent{Topic: "StartBackup", Profile: currentProfile}
@@ -48,18 +47,18 @@ func (w *MainWindow) init() {
 	w.ProfileAddButton.ConnectClicked(w.addProfile)
 	w.ProfileDeleteButton.ConnectClicked(w.removeProfile)
 	w.ProfileRenameButton.ConnectClicked(w.renameProfile)
-	w.ConnectClose(func() bool {w.Close(); return true})
+	w.ConnectClose(func() bool { w.Close(); return true })
 	w.Show()
 }
 
 func (w *MainWindow) AddTabs() {
 	// Keep reference of tabs
 	Tabs = MainWindowTabs{
-		RepoTab: NewRepoTab(w),
-		SourceTab: NewSourceTab(w),
+		RepoTab:     NewRepoTab(w),
+		SourceTab:   NewSourceTab(w),
 		ScheduleTab: NewScheduleTab(w),
-		ArchiveTab: NewArchiveTab(w),
-		MiscTab: NewMiscTab(w),
+		ArchiveTab:  NewArchiveTab(w),
+		MiscTab:     NewMiscTab(w),
 	}
 	w.TabWidget.AddTab(Tabs.RepoTab, "Repository")
 	w.TabWidget.AddTab(Tabs.SourceTab, "Sources")
@@ -86,8 +85,8 @@ func (w *MainWindow) refreshAllTabs() {
 }
 
 func (w *MainWindow) displayLogMessage(m string) {
-		w.CreateProgressText.SetText(m)
-		w.CreateProgressText.Repaint()
+	w.CreateProgressText.SetText(m)
+	w.CreateProgressText.Repaint()
 }
 
 func (w *MainWindow) addProfile(_ bool) {
@@ -99,7 +98,7 @@ func (w *MainWindow) addProfile(_ bool) {
 		newProfileId, _ := rows.LastInsertId()
 		models.DB.Get(currentProfile, models.SqlProfileById, newProfileId)
 		w.ProfileSelector.AddItem(currentProfile.Name, core.NewQVariant1(currentProfile.Id))
-		ix := w.ProfileSelector.FindData(core.NewQVariant1(currentProfile.Id), int(core.Qt__UserRole),  core.Qt__MatchExactly)
+		ix := w.ProfileSelector.FindData(core.NewQVariant1(currentProfile.Id), int(core.Qt__UserRole), core.Qt__MatchExactly)
 		w.ProfileSelector.SetCurrentIndex(ix)
 		currentRepo = &models.Repo{}
 		w.refreshAllTabs()
@@ -118,19 +117,19 @@ func (w *MainWindow) renameProfile(_ bool) {
 		utils.Log.Info("profile renamed")
 		currentProfile.Name = dialog.ProfileNameField.Text()
 		currentProfile.SaveField("name")
-		ix := w.ProfileSelector.FindData(core.NewQVariant1(currentProfile.Id), int(core.Qt__UserRole),  core.Qt__MatchExactly)
+		ix := w.ProfileSelector.FindData(core.NewQVariant1(currentProfile.Id), int(core.Qt__UserRole), core.Qt__MatchExactly)
 		w.ProfileSelector.SetItemText(ix, currentProfile.Name)
 	})
 	dialog.Show()
 }
 
-func (w *MainWindow) removeProfile (_ bool) {
+func (w *MainWindow) removeProfile(_ bool) {
 	msgBox := widgets.QMessageBox_Question(nil, "Remove Profile",
 		fmt.Sprintf("Are you sure you want to remove the profile %v?",
 			currentProfile.Name), widgets.QMessageBox__Yes|widgets.QMessageBox__No, 0)
 
 	if msgBox == widgets.QMessageBox__Yes {
-		ix := w.ProfileSelector.FindData(core.NewQVariant1(currentProfile.Id), int(core.Qt__UserRole),  core.Qt__MatchExactly)
+		ix := w.ProfileSelector.FindData(core.NewQVariant1(currentProfile.Id), int(core.Qt__UserRole), core.Qt__MatchExactly)
 		w.ProfileSelector.RemoveItem(ix)
 		models.DB.MustExec(models.SqlRemoveProfileById, currentProfile.Id)
 		var nProfiles int
@@ -146,7 +145,7 @@ func (w *MainWindow) removeProfile (_ bool) {
 func (w *MainWindow) RunUIEventHandler(appChan chan utils.VEvent) {
 	for e := range MainWindowChan {
 		switch e.Topic {
-		case "StatusUpdate":  // TODO: Use enums here.
+		case "StatusUpdate": // TODO: Use enums here.
 			w.displayLogMessage(e.Message)
 		case "ChangeRepo":
 			utils.Log.Info("Repo changed")
@@ -175,7 +174,7 @@ func (w *MainWindow) RunUIEventHandler(appChan chan utils.VEvent) {
 func ChooseFileDialog(callback func(files []string)) {
 	fd := widgets.NewQFileDialog(nil, 0)
 	fd.SetFileMode(widgets.QFileDialog__Directory)
-	fd.SetWindowModality(core.Qt__WindowModal)  //TODO: not working on macOS?
+	fd.SetWindowModality(core.Qt__WindowModal) //TODO: not working on macOS?
 	fd.ConnectFilesSelected(callback)
-	fd.Exec()  //TODO: what happens if user cancels?
+	fd.Exec() //TODO: what happens if user cancels?
 }

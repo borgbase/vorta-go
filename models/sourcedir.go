@@ -6,9 +6,9 @@ import (
 
 var (
 	SqlAllSourcesByProfileId = "SELECT * FROM sourcedirmodel WHERE profile_id=?"
-	SqlCountSources = `SELECT count(*) FROM sourcedirmodel WHERE profile_id=? and dir=?`
-	SqlInsertSourceDir = `INSERT INTO sourcedirmodel VALUES (NULL, ?, ?, DATETIME('now'))`
-	SqlDeleteSourceDir = `DELETE FROM sourcedirmodel WHERE profile_id=? and dir=?`
+	SqlCountSources          = `SELECT count(*) FROM sourcedirmodel WHERE profile_id=? and dir=?`
+	SqlInsertSourceDir       = `INSERT INTO sourcedirmodel VALUES (NULL, ?, ?, DATETIME('now'))`
+	SqlDeleteSourceDir       = `DELETE FROM sourcedirmodel WHERE profile_id=? and dir=?`
 )
 
 var SqlSourceDirSchema = `
@@ -23,8 +23,8 @@ CREATE TABLE IF NOT EXISTS "sourcedirmodel"
 `
 
 type SourceDir struct {
-	Id int `db:"id"`
-	Dir string `db:"dir"`
-	ProfileId int `db:"profile_id"`
-	AddedAt time.Time `db:"added_at"`
+	Id        int       `db:"id"`
+	Dir       string    `db:"dir"`
+	ProfileId int       `db:"profile_id"`
+	AddedAt   time.Time `db:"added_at"`
 }

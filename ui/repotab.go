@@ -11,12 +11,12 @@ import (
 )
 
 var availableCompression = map[string]string{
-	"LZ4 (modern, default)": "lz4",
-	"Zstandard Level 3 (modern)": "zstd,3",
-	"Zstandard Level 8 (modern)": "zstd,8",
+	"LZ4 (modern, default)":       "lz4",
+	"Zstandard Level 3 (modern)":  "zstd,3",
+	"Zstandard Level 8 (modern)":  "zstd,8",
 	"ZLIB Level 6 (auto, legacy)": "auto,zlib,6",
 	"LZMA Level 6 (auto, legacy)": "auto,lzma,6",
-	"No Compression": "none",
+	"No Compression":              "none",
 }
 
 func (t *RepoTab) init() {
@@ -37,13 +37,13 @@ func (t *RepoTab) init() {
 	t.SshComboBox.AddItem("Automatically choose SSH Key (default)", core.NewQVariant1(nil))
 
 	/*
-	    def init_ssh(self):
-	        keys = get_private_keys()
-	        self.sshComboBox.clear()
-	        self.sshComboBox.addItem(self.tr('Automatically choose SSH Key (default)'), None)
-	        self.sshComboBox.addItem(self.tr('Create New Key'), 'new')
-	        for key in keys:
-	            self.sshComboBox.addItem(f'{key["filename"]} ({key["format"]})', key['filename'])
+	   def init_ssh(self):
+	       keys = get_private_keys()
+	       self.sshComboBox.clear()
+	       self.sshComboBox.addItem(self.tr('Automatically choose SSH Key (default)'), None)
+	       self.sshComboBox.addItem(self.tr('Create New Key'), 'new')
+	       for key in keys:
+	           self.sshComboBox.addItem(f'{key["filename"]} ({key["format"]})', key['filename'])
 
 	*/
 
@@ -71,7 +71,7 @@ func (t *RepoTab) unlinkRepo(_ bool) {
 		utils.Log.Info("Unlinking repo %v", currentRepo.Url)
 		currentRepoId := currentRepo.Id
 		currentRepo = &models.Repo{}
-		currentProfile.RepoId = sql.NullInt64{Valid:false}
+		currentProfile.RepoId = sql.NullInt64{Valid: false}
 		currentProfile.SaveField("repo_id")
 		models.DB.MustExec(models.SqlRemoveRepoById, currentRepoId)
 		t.RepoSelector.RemoveItem(t.RepoSelector.CurrentIndex())
@@ -79,8 +79,6 @@ func (t *RepoTab) unlinkRepo(_ bool) {
 		t.RepoSelector.ConnectCurrentIndexChanged(t.repoSelectorChanged)
 	}
 }
-
-
 
 func (t *RepoTab) setCompression() {
 	ix := t.RepoCompression.FindData(core.NewQVariant1(currentProfile.Compression), int(core.Qt__UserRole), core.Qt__MatchExactly)
@@ -107,7 +105,7 @@ func (t *RepoTab) Populate() {
 	}
 	ix := t.RepoSelector.FindData(core.NewQVariant1(currentRepo.Id), int(core.Qt__UserRole), core.Qt__MatchExactly)
 	if ix < 0 {
-		ix = 0  // if currentRepo is empty, set to first row.
+		ix = 0 // if currentRepo is empty, set to first row.
 	}
 	t.RepoSelector.SetCurrentIndex(ix)
 
@@ -122,11 +120,11 @@ func (t *RepoTab) repoSelectorChanged(index int) {
 	} else if itemData == "new" {
 		dialog := NewRepoAddDialog(t)
 		dialog.SetParent2(t, core.Qt__Sheet)
-		dialog.ConnectAccepted(func(){
+		dialog.ConnectAccepted(func() {
 			utils.Log.Info("New repo added.")
 			MainWindowChan <- utils.VEvent{Topic: "ChangeRepo", Message: string(currentRepo.Id)}
 		})
-		dialog.ConnectRejected(func(){
+		dialog.ConnectRejected(func() {
 			utils.Log.Info("Dialog Rejected")
 		})
 		dialog.Show()
@@ -134,12 +132,12 @@ func (t *RepoTab) repoSelectorChanged(index int) {
 		dialog := NewRepoAddDialog(t)
 		dialog.UseForExistingRepo()
 		dialog.SetParent2(t, core.Qt__Sheet)
-		dialog.ConnectAccepted(func(){
+		dialog.ConnectAccepted(func() {
 			utils.Log.Info("Existing repo added.")
 			MainWindowChan <- utils.VEvent{Topic: "ChangeRepo", Message: string(currentRepo.Id)}
 
 		})
-		dialog.ConnectRejected(func(){
+		dialog.ConnectRejected(func() {
 			utils.Log.Info("Dialog Rejected")
 		})
 		dialog.Show()

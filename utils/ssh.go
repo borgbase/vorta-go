@@ -15,7 +15,6 @@ AAAEBrGM/hXTiyPUG2hDoqnz2g123+15rcbVtBU1J1o5YBwLQKZkz6RvjhOvLNlED1Py0L
 wNpwLwp8HzFMKIWE1pHzAAAAD21hbnVAbnl4Mi5sb2NhbAECAwQFBg==
 -----END OPENSSH PRIVATE KEY-----`
 
-
 func main() {
 	priv, err := ssh.ParseRawPrivateKey([]byte(rawKey))
 	fmt.Println(err)
@@ -58,4 +57,4 @@ def get_private_keys():
 
     return available_private_keys
 
- */
+*/
