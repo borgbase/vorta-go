@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"github.com/therecipe/qt/core"
 	"regexp"
-	"vorta-go/borg"
-	"vorta-go/models"
-	"vorta-go/utils"
+	"vorta/borg"
+	"vorta/models"
+	"vorta/utils"
 )
 
 var encryptionModes = map[string]string{

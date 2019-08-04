@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
-	"vorta-go/models"
-	"vorta-go/utils"
+	"vorta/models"
+	"vorta/utils"
 )
 
 type MainWindowTabs struct {

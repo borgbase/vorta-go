@@ -3,7 +3,7 @@ package ui
 import (
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
-	"vorta-go/utils"
+	"vorta/utils"
 )
 
 var schedulerRadioMap map[string]*widgets.QRadioButton

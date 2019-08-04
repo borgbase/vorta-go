@@ -17,6 +17,7 @@ var (
 	SqlCountProfiles          = "SELECT count(*) from backupprofilemodel"
 	SqlRemoveProfileById      = `DELETE FROM backupprofilemodel WHERE id=?`
 	SqlUpdateProfileFieldById = `UPDATE backupprofilemodel SET %[1]v = :%[1]v WHERE id = :id;`
+	SqlAllSshKeys			  = `SELECT ssh_key FROM backupprofilemodel WHERE ssh_key NOT NULL`
 	SqlNewProfile             = `INSERT INTO "backupprofilemodel"
 					  VALUES (NULL, ?, (DATETIME('now')), NULL, NULL, 'zstd,3', '*/.DS_Store', '.nobackup', 
 							  'off', 1, 24, 17, 54, 1, 3, 0, 2, 7, 4, 6, 2, '', '{hostname}__{profile_slug}-{now}', 

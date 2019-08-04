@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
-	"vorta-go/utils"
+	"vorta/utils"
 )
 
 type BorgBin struct {

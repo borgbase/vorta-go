@@ -2,11 +2,11 @@ package main
 
 import (
 	"github.com/therecipe/qt/widgets"
-	"vorta-go/app"
-	"vorta-go/borg"
-	"vorta-go/models"
-	"vorta-go/ui"
-	"vorta-go/utils"
+	"vorta/app"
+	"vorta/borg"
+	"vorta/models"
+	"vorta/ui"
+	"vorta/utils"
 )
 
 func main() {

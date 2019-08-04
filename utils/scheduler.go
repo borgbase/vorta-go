@@ -3,7 +3,7 @@ package utils
 import (
 	"fmt"
 	"github.com/robfig/cron/v3"
-	"vorta-go/models"
+	"vorta/models"
 )
 
 type SchedulerCls struct {

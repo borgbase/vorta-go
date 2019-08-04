@@ -3,8 +3,8 @@ package app
 import (
 	"github.com/therecipe/qt/gui"
 	"github.com/therecipe/qt/widgets"
-	"vorta-go/models"
-	"vorta-go/utils"
+	"vorta/models"
+	"vorta/utils"
 )
 
 type systemTray struct {

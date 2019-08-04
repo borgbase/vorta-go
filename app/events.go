@@ -1,8 +1,8 @@
 package app
 
 import (
-	"vorta-go/borg"
-	"vorta-go/utils"
+	"vorta/borg"
+	"vorta/utils"
 )
 
 func RunAppEventHandler(UIChan chan utils.VEvent) {

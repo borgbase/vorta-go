@@ -1,8 +1,8 @@
 package ui
 
 import (
-	"vorta-go/models"
-	"vorta-go/utils"
+	"vorta/models"
+	"vorta/utils"
 )
 
 func (t *SourceTab) init() {

@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
-	"vorta-go/models"
-	"vorta-go/utils"
+	"vorta/models"
+	"vorta/utils"
 )
 
 type CreateRun struct {

@@ -2,7 +2,7 @@ package borg
 
 import (
 	"strings"
-	"vorta-go/models"
+	"vorta/models"
 )
 
 type InitRun struct {

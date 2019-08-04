@@ -6,7 +6,7 @@ import (
 	"os"
 	"runtime"
 	"strings"
-	"vorta-go/utils"
+	"vorta/utils"
 )
 
 var (

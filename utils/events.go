@@ -1,6 +1,6 @@
 package utils
 
-import "vorta-go/models"
+import "vorta/models"
 
 type VEvent struct {
 	Topic   string

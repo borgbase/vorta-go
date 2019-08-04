@@ -1,7 +1,7 @@
 package borg
 
 import (
-	"vorta-go/models"
+	"vorta/models"
 )
 
 type CheckRun struct {

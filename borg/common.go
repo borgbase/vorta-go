@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"github.com/bitly/go-simplejson"
 	"io"
-	"vorta-go/utils"
+	"vorta/utils"
 
 	"errors"
 	"golang.org/x/sync/semaphore"
 	"os"
 	"os/exec"
-	"vorta-go/models"
+	"vorta/models"
 )
 
 var (

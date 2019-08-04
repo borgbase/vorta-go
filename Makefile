@@ -1,7 +1,8 @@
 OUT := vorta
 PKG := gitlab.com/group/project
 VERSION := $(shell git describe --always --long --dirty)
-DISTRO ?= ubuntu-19.04
+DISTRO ?= ubuntu
+DISTRO_VERSION ?= 19.04
 
 .PHONY: darwin linux
 
@@ -14,12 +15,11 @@ linux:
 	nfpm -f build/package/nfpm.yaml pkg --target deploy/linux/vorta_v0.0.1-$(DISTRO)_amd64.deb
 	mv deploy/linux/vorta deploy/linux/vorta_v0.0.1-$(DISTRO)_amd64.bin
 
-
 darwin:
-	QT_HOMEBREW=true qtdeploy -uic=false -quickcompiler -ldflags="-X main.version=${VERSION}" build
+	QT_HOMEBREW=true qtdeploy -uic=false -quickcompiler -ldflags '-X vorta/ui.version=${VERSION}' build
 	xattr -cr deploy/darwin/vorta-go.app
 	codesign -f --deep --sign 'Developer ID Application: Manuel Riel (CNMSCAXT48)' deploy/darwin/vorta-go.app
 	sleep 2; appdmg appdmg.json deploy/darwin/vorta-go.dmg
 
 test:
-	qtdeploy -uic=false -quickcompiler -ldflags="-X main.version=${VERSION}" test
+	QT_HOMEBREW=true qtdeploy -uic=false -quickcompiler -ldflags '-X vorta/ui.version=${VERSION}' test

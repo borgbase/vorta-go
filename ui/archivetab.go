@@ -6,9 +6,9 @@ import (
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
 	"time"
-	"vorta-go/borg"
-	"vorta-go/models"
-	"vorta-go/utils"
+	"vorta/borg"
+	"vorta/models"
+	"vorta/utils"
 )
 
 var (

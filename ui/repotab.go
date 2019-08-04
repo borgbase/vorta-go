@@ -6,8 +6,8 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
-	"vorta-go/models"
-	"vorta-go/utils"
+	"vorta/models"
+	"vorta/utils"
 )
 
 var availableCompression = map[string]string{
@@ -35,18 +35,8 @@ func (t *RepoTab) init() {
 	t.RepoRemoveToolbutton.ConnectClicked(t.unlinkRepo)
 
 	t.SshComboBox.AddItem("Automatically choose SSH Key (default)", core.NewQVariant1(nil))
-
-	/*
-	   def init_ssh(self):
-	       keys = get_private_keys()
-	       self.sshComboBox.clear()
-	       self.sshComboBox.addItem(self.tr('Automatically choose SSH Key (default)'), None)
-	       self.sshComboBox.addItem(self.tr('Create New Key'), 'new')
-	       for key in keys:
-	           self.sshComboBox.addItem(f'{key["filename"]} ({key["format"]})', key['filename'])
-
-	*/
-
+	t.SshComboBox.AddItem("Create new SSH Key", core.NewQVariant1("new"))
+	t.SshComboBox.ConnectCurrentIndexChanged(t.sshSelectorChanged)
 }
 
 func (t *RepoTab) compressionSelectorChanged(ix int) {
@@ -109,15 +99,49 @@ func (t *RepoTab) Populate() {
 	}
 	t.RepoSelector.SetCurrentIndex(ix)
 
+	for i := t.SshComboBox.Count(); i > 1; i-- {
+		t.SshComboBox.RemoveItem(i)
+	}
+	localSshKeys, err := utils.FindSSHKeysInStandardFolder()
+	if err != nil {
+		utils.Log.Errorf("Error reading users SSH keys in ~/.ssh: %v", err)
+	}
+	if len(localSshKeys) > 0 {
+		t.SshComboBox.InsertSeparator(2)
+		for _, key := range localSshKeys {
+			t.SshComboBox.AddItem(key, core.NewQVariant1(key))
+		}
+	}
+
 	t.setStats()
 	t.setCompression()
 }
 
+func (t *RepoTab) sshSelectorChanged(index int) {
+	switch index {
+	case 0:
+		currentProfile.SSHKey = sql.NullString{Valid:false}
+		currentProfile.SaveField("ssh_key")
+	case 1:
+		dialog := NewSshAddDialog(t)
+		dialog.SetParent2(t, core.Qt__Sheet)
+		dialog.ConnectRejected(func() {
+			utils.Log.Info("SSH Dialog closed")
+			t.Populate()
+			ix := t.SshComboBox.FindData(core.NewQVariant1(dialog.OutputFileTextBox.Text()), int(core.Qt__UserRole), core.Qt__MatchExactly)
+			t.SshComboBox.SetCurrentIndex(ix)
+		})
+		dialog.Show()
+	}
+}
+
 func (t *RepoTab) repoSelectorChanged(index int) {
-	itemData := t.RepoSelector.ItemData(index, int(core.Qt__UserRole)).ToString()
 	if index == 0 {
 		return
-	} else if itemData == "new" {
+	}
+	itemData := t.RepoSelector.ItemData(index, int(core.Qt__UserRole)).ToString()
+	switch itemData {
+	case "new":
 		dialog := NewRepoAddDialog(t)
 		dialog.SetParent2(t, core.Qt__Sheet)
 		dialog.ConnectAccepted(func() {
@@ -128,7 +152,7 @@ func (t *RepoTab) repoSelectorChanged(index int) {
 			utils.Log.Info("Dialog Rejected")
 		})
 		dialog.Show()
-	} else if itemData == "existing" {
+	case "existing":
 		dialog := NewRepoAddDialog(t)
 		dialog.UseForExistingRepo()
 		dialog.SetParent2(t, core.Qt__Sheet)
@@ -141,7 +165,7 @@ func (t *RepoTab) repoSelectorChanged(index int) {
 			utils.Log.Info("Dialog Rejected")
 		})
 		dialog.Show()
-	} else {
+	default:
 		MainWindowChan <- utils.VEvent{Topic: "ChangeRepo", Message: itemData}
 	}
 }

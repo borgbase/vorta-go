@@ -1,4 +1,4 @@
-module vorta-go
+module vorta
 
 go 1.12
 
