@@ -7,6 +7,7 @@ import (
 	"strings"
 	"vorta/models"
 	"vorta/utils"
+	"github.com/mitchellh/go-homedir"
 )
 
 type CreateRun struct {
@@ -30,15 +31,22 @@ func NewCreateRun(profile *models.Profile) (*CreateRun, error) {
 	excludePatterns := []string{}
 	excludeString := r.Profile.ExcludePatterns.String
 	if excludeString != "" {
-		lines := strings.Split(excludeString, `\n`)
+		lines := strings.Split(excludeString, "\n")
 		for _, l := range lines {
 			l = strings.TrimSpace(l)
+			l, err := homedir.Expand(l)
+			utils.Log.Info(l)
+			if err != nil {
+				utils.Log.Error(err)
+				continue
+			}
 			excludePatterns = append(excludePatterns, l)
 		}
 
-		tmpFile, _ := ioutil.TempFile(os.TempDir(), "prefix-")
+		tmpFile, _ := ioutil.TempFile(os.TempDir(), "borg-exclude-from-")
 		tmpFile.Write([]byte(strings.Join(excludePatterns[:], "\n")))
 		r.SubCommandArgs = append(r.SubCommandArgs, "--exclude-from", tmpFile.Name())
+		utils.Log.Infof("Writing exclude file to %v", tmpFile.Name())
 	}
 
 	// TODO: implement exclude-if-present

@@ -6,18 +6,6 @@ import (
 )
 
 func (t *SourceTab) init() {
-	t.ExcludePatternsField.ConnectTextChanged(func() {
-		currentProfile.ExcludePatterns.String = t.ExcludePatternsField.ToPlainText()
-		currentProfile.ExcludePatterns.Valid = true
-		currentProfile.SaveField("exclude_patterns")
-	})
-
-	t.ExcludeIfPresentField.ConnectTextChanged(func() {
-		currentProfile.ExcludeIfPresent.String = t.ExcludeIfPresentField.ToPlainText()
-		currentProfile.ExcludeIfPresent.Valid = true
-		currentProfile.SaveField("exclude_if_present")
-	})
-
 	t.SourceAddFile.ConnectClicked(func(_ bool) {
 		utils.Log.Info("Add file triggered.")
 		ChooseFileDialog(func(files []string) {
@@ -39,6 +27,8 @@ func (t *SourceTab) init() {
 }
 
 func (t *SourceTab) Populate() {
+	t.ExcludeIfPresentField.DisconnectTextChanged()
+	t.ExcludePatternsField.DisconnectTextChanged()
 	t.ExcludeIfPresentField.Clear()
 	t.ExcludePatternsField.Clear()
 	for i := t.SourceFilesWidget.Count(); i >= 0; i-- { // Clear() didn't work.
@@ -49,10 +39,21 @@ func (t *SourceTab) Populate() {
 	models.DB.Select(&ss, models.SqlAllSourcesByProfileId, currentProfile.Id)
 	for _, s := range ss {
 		t.SourceFilesWidget.AddItem(s.Dir)
-		utils.Log.Info("Adding item", s.Dir)
 	}
 	t.SourceFilesWidget.Repaint()
 	t.ExcludePatternsField.AppendPlainText(currentProfile.ExcludePatterns.String)
 	t.ExcludeIfPresentField.AppendPlainText(currentProfile.ExcludeIfPresent.String)
 
+	t.ExcludePatternsField.ConnectTextChanged(t.saveExcludes)
+	t.ExcludeIfPresentField.ConnectTextChanged(t.saveExcludes)
+}
+
+func (t *SourceTab) saveExcludes() {
+	currentProfile.ExcludePatterns.String = t.ExcludePatternsField.ToPlainText()
+	currentProfile.ExcludePatterns.Valid = true
+	currentProfile.SaveField("exclude_patterns")
+
+	currentProfile.ExcludeIfPresent.String = t.ExcludeIfPresentField.ToPlainText()
+	currentProfile.ExcludeIfPresent.Valid = true
+	currentProfile.SaveField("exclude_if_present")
 }

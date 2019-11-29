@@ -1,6 +1,6 @@
 OUT := vorta
 PKG := gitlab.com/group/project
-VERSION := $(shell git describe --always --long --dirty)
+VERSION := $(shell git describe --abbrev=0 --tags)
 DISTRO ?= ubuntu
 DISTRO_VERSION ?= 19.04
 

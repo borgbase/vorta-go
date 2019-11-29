@@ -19,10 +19,19 @@ func RunAppEventHandler(UIChan chan utils.VEvent) {
 					utils.Log.Error(err)
 				}
 				AppChan <- utils.VEvent{Topic: "StatusUpdate", Message: "Started Backup"}
-				b.Run()
-				b.ProcessResult()
-				UIChan <- utils.VEvent{Topic: "UpdateArchiveTab"}
+				vortaTray.SetIcon(true)
+				err = b.Run()
+				if err != nil {
+					utils.Log.Errorf("Error during backup run: %v", err)
+				} else {
+					b.ProcessResult()
+					UIChan <- utils.VEvent{Topic: "UpdateArchiveTab"}
+
+				}
+				vortaTray.SetIcon(false)
 			}()
+		case "CancelBorgRun":
+			borg.CancelBorgRun()
 		default:
 			utils.Log.Info(e)
 		}

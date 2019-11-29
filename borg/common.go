@@ -18,6 +18,7 @@ import (
 var (
 	borgProcessSlot = semaphore.NewWeighted(1)
 	AppEventChan    chan utils.VEvent
+	cmd *exec.Cmd
 )
 
 type BorgRun struct {
@@ -80,7 +81,7 @@ func (r *BorgRun) Run() error {
 	mergedArgs := append(r.CommonBorgArgs, r.SubCommand)
 	mergedArgs = append(mergedArgs, r.SubCommandArgs...)
 	utils.Log.Info("Running command: ", r.Bin.Path, mergedArgs)
-	cmd := exec.Command(
+	cmd = exec.Command(
 		r.Bin.Path,
 		mergedArgs...,
 	)
@@ -143,4 +144,16 @@ func (r *BorgRun) Run() error {
 
 func (r *BorgRun) ProcessResult() {
 	utils.Log.Error("not implemented")
+}
+
+func CancelBorgRun() {
+	if borgProcessSlot.TryAcquire(1) {
+		borgProcessSlot.Release(1)
+		// No borg process is running.
+		return
+	}
+	if err := cmd.Process.Kill(); err != nil {
+		utils.Log.Error("failed to kill process: ", err)
+		return
+	}
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
+	"vorta/app"
 	"vorta/borg"
 	"vorta/models"
 	"vorta/utils"
@@ -49,6 +50,8 @@ func (w *MainWindow) init() {
 	w.ProfileDeleteButton.ConnectClicked(w.removeProfile)
 	w.ProfileRenameButton.ConnectClicked(w.renameProfile)
 	w.ConnectClose(func() bool { w.Close(); return true })
+	w.CancelButton.ConnectClicked(func(_ bool) {
+		app.AppChan <- utils.VEvent{Topic: "CancelBorgRun" }})
 	w.Show()
 }
 

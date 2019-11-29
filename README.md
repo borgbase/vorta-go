@@ -25,13 +25,12 @@ Backend Functionality
 - [x] Keychain/SecretService
 - [x] Background scheduler
 - [x] Single App
-- [ ] Backup status (icon, menu)
 - [x] Read and parse existing SSH keys
 - [x] Create new SSH key
 - [x] Check Borg version for available features
 - [ ] Tests
 - [ ] Read list of WiFis
-- [ ] Password fallback in database
+- [ ] Password fallback to database
 - [ ] Translations
 
 Packaging (via Docker)
@@ -42,11 +41,25 @@ Packaging (via Docker)
 - [x] Archlinux
 - [ ] Windows?
 
+Other issues:
+- [x] Exclusions
+- [x] Cancel button
+- [x] Backup status (icon, menu)
+- [ ] Bug: exclusions are lost
+
 ## Development
 
-1. Follow the [official steps](https://github.com/therecipe/qt/wiki/Installation) to set up a Go project in **Module Mode**.
+1. Follow the [official steps](https://github.com/therecipe/qt/wiki/Installation) to set up a Go project in **Module Mode**. E.g. for macOS
+
+```
+export GO111MODULE=on
+go install -v -tags=no_env github.com/therecipe/qt/cmd/...
+go mod vendor
+git clone https://github.com/therecipe/env_darwin_amd64_513.git vendor/github.com/therecipe/env_darwin_amd64_513
+```
+
 2. Test app using `$ qtdeploy -debug -uic=false -quickcompiler test`
-3. Package for deployment `$ qtdeploy -uic=false -quickcompiler build`
+3. Package for deployment `$ qtdeploy -uic=false -quickcompiler build` or `make darwin`
 
 Important folders:
 

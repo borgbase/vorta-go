@@ -43,9 +43,25 @@ func (t *systemTray) drawMenu() {
 	pp := []models.Profile{}
 	models.DB.Select(&pp, models.SqlAllProfiles)
 	for _, p := range pp {
-		profileName := p.Name
-		profileMenu.AddAction(p.Name).ConnectTriggered(func(checked bool) { utils.Log.Info("Would backup profile", profileName) })
+		profile := &p
+		profileMenu.AddAction(p.Name).ConnectTriggered(func(checked bool) {
+			utils.Log.Infof("Backup triggered for profile: %v", profile.Name)
+			AppChan <- utils.VEvent{Topic: "StartBackup", Profile: profile}
+		})
 	}
 
 	t.menu.AddAction("Quit").ConnectTriggered(func(checked bool) { QtApp.Quit() })
+}
+
+func (t *systemTray) SetIcon(active bool) {
+	var fileName string
+	if active {
+		fileName = ":qml/icons/hdd-o-active-dark.png"
+	} else {
+		fileName = ":qml/icons/hdd-o-dark.png"
+	}
+	trayIcon := gui.NewQIcon5(fileName)
+	vortaTray.icon.Hide()
+	vortaTray.icon.SetIcon(trayIcon)
+	vortaTray.icon.Show()
 }
