@@ -21,7 +21,7 @@ func isMiscSSHFile(category string) bool {
 	return false
 }
 
-func GetSSHDir() (string, error){
+func GetSSHDir() (string, error) {
 	usr, _ := user.Current()
 	return path.Join(usr.HomeDir, ".ssh"), nil
 }

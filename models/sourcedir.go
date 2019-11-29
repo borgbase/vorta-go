@@ -4,27 +4,13 @@ import (
 	"time"
 )
 
-var (
-	SqlAllSourcesByProfileId = "SELECT * FROM sourcedirmodel WHERE profile_id=?"
-	SqlCountSources          = `SELECT count(*) FROM sourcedirmodel WHERE profile_id=? and dir=?`
-	SqlInsertSourceDir       = `INSERT INTO sourcedirmodel VALUES (NULL, ?, ?, DATETIME('now'))`
-	SqlDeleteSourceDir       = `DELETE FROM sourcedirmodel WHERE profile_id=? and dir=?`
-)
-
-var SqlSourceDirSchema = `
-CREATE TABLE IF NOT EXISTS "sourcedirmodel"
-  (
-     "id"         INTEGER NOT NULL PRIMARY KEY,
-     "dir"        VARCHAR(255) NOT NULL,
-     "profile_id" INTEGER NOT NULL,
-     "added_at"   DATETIME NOT NULL,
-     FOREIGN KEY ("profile_id") REFERENCES "backupprofilemodel" ("id")
-  );
-`
-
 type SourceDir struct {
-	Id        int       `db:"id"`
-	Dir       string    `db:"dir"`
-	ProfileId int       `db:"profile_id"`
-	AddedAt   time.Time `db:"added_at"`
+	ID        int       `gorm:"column:id;not null;primary_key"`
+	Dir       string    `gorm:"column:dir;type:varchar(255);not null"`
+	ProfileId int       `gorm:"column:profile_id;not null"`
+	AddedAt   time.Time `gorm:"column:added_at;not null;default:CURRENT_TIMESTAMP"`
+}
+
+func (SourceDir) TableName() string {
+	return "sourcedirmodel"
 }

@@ -27,16 +27,16 @@ func (s *SchedulerCls) ReloadJobs() {
 	s.Cron.Stop()
 	s.Cron = cron.New()
 	pp := []models.Profile{}
-	models.DB.Select(&pp, models.SqlAllProfiles)
+	models.DB.Find(&pp)
 	for _, p := range pp {
 		var cronStr string
 		var newJob VortaJob
 		switch p.ScheduleMode {
 		case "interval":
-			newJob = VortaJob{ProfileId: p.Id}
+			newJob = VortaJob{ProfileId: p.ID}
 			cronStr = fmt.Sprintf("%d */%d * * *", p.ScheduleIntervalMinutes, p.ScheduleIntervalHours)
 		case "fixed":
-			newJob = VortaJob{ProfileId: p.Id}
+			newJob = VortaJob{ProfileId: p.ID}
 			cronStr = fmt.Sprintf("%d %d * * *", p.ScheduleFixedMinute, p.ScheduleFixedHour)
 		default:
 			continue
@@ -45,7 +45,7 @@ func (s *SchedulerCls) ReloadJobs() {
 		if err != nil {
 			Log.Error(err)
 		}
-		s.IdToProfileMap[p.Id] = jobId
+		s.IdToProfileMap[p.ID] = jobId
 		Log.Info("Scheduled job for profile ", p.Name)
 	}
 	s.Cron.Start()

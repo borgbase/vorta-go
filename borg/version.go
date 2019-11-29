@@ -1,9 +1,9 @@
 package borg
 
 import (
+	"github.com/hashicorp/go-version"
 	"strings"
 	"vorta/models"
-	"github.com/hashicorp/go-version"
 )
 
 type VersionRun struct {
@@ -13,8 +13,8 @@ type VersionRun struct {
 var BorgVersion = "0.0.0"
 
 var minVersionForFeature = map[string]string{
-	"BLAKE2": "1.1.4",
-	"ZSTD": "1.1.4",
+	"BLAKE2":   "1.1.4",
+	"ZSTD":     "1.1.4",
 	"JSON_LOG": "1.1.0",
 }
 

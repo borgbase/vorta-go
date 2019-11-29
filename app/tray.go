@@ -38,10 +38,9 @@ func (t *systemTray) drawMenu() {
 			AppChan <- utils.VEvent{Topic: "OpenMainWindow", Message: "From Tray"}
 		})
 	t.menu.AddSeparator()
-	//t.menu.AddAction("Backup Now")
 	profileMenu := t.menu.AddMenu2("Backup Now")
 	pp := []models.Profile{}
-	models.DB.Select(&pp, models.SqlAllProfiles)
+	models.DB.Find(&pp)
 	for _, p := range pp {
 		profile := &p
 		profileMenu.AddAction(p.Name).ConnectTriggered(func(checked bool) {

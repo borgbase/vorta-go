@@ -45,15 +45,16 @@ func (t *RepoTab) init() {
 
 func (t *RepoTab) compressionSelectorChanged(ix int) {
 	currentProfile.Compression = t.RepoCompression.ItemData(ix, int(core.Qt__UserRole)).ToString()
-	sql := fmt.Sprintf(models.SqlUpdateProfileFieldById, "compression")
-	_, err := models.DB.NamedExec(sql, currentProfile)
-	if err != nil {
-		utils.Log.Error(err)
-	}
+	models.DB.Save(currentProfile)
+	//sql := fmt.Sprintf(models.SqlUpdateProfileFieldById, "compression")
+	//_, err := models.DB.NamedExec(sql, currentProfile)
+	//if err != nil {
+	//	utils.Log.Error(err)
+	//}
 }
 
 func (t *RepoTab) unlinkRepo(_ bool) {
-	if currentRepo.Id != t.RepoSelector.CurrentData(int(core.Qt__UserRole)).ToInt(nil) {
+	if currentRepo.ID != t.RepoSelector.CurrentData(int(core.Qt__UserRole)).ToInt(nil) {
 		utils.Log.Panic("Not sure which repo to unlink.")
 	}
 	msgBox := widgets.QMessageBox_Question(nil, "Unlink Repo",
@@ -63,11 +64,13 @@ func (t *RepoTab) unlinkRepo(_ bool) {
 	if msgBox == widgets.QMessageBox__Yes {
 		t.RepoSelector.DisconnectCurrentIndexChanged()
 		utils.Log.Info("Unlinking repo %v", currentRepo.Url)
-		currentRepoId := currentRepo.Id
-		currentRepo = &models.Repo{}
+		//currentRepoId := currentRepo.ID
 		currentProfile.RepoId = sql.NullInt64{Valid: false}
-		currentProfile.SaveField("repo_id")
-		models.DB.MustExec(models.SqlRemoveRepoById, currentRepoId)
+		//currentProfile.SaveField("repo_id")
+		models.DB.Save(&currentProfile)
+		//models.DB.MustExec(models.SqlRemoveRepoById, currentRepoId)
+		models.DB.Delete(currentRepo)
+		currentRepo = &models.Repo{}
 		t.RepoSelector.RemoveItem(t.RepoSelector.CurrentIndex())
 		t.RepoSelector.SetCurrentIndex(0)
 		t.RepoSelector.ConnectCurrentIndexChanged(t.repoSelectorChanged)
@@ -89,15 +92,16 @@ func (t *RepoTab) setStats() {
 
 func (t *RepoTab) Populate() {
 	rr := []models.Repo{}
-	models.DB.Select(&rr, models.SqlAllRepos)
+	//models.DB.Select(&rr, models.SqlAllRepos)
+	models.DB.Find(&rr)
 	for _, repo := range rr {
 		// see if repo already exists, otherwise add it.
-		existingIx := t.RepoSelector.FindData(core.NewQVariant1(repo.Id), int(core.Qt__UserRole), core.Qt__MatchExactly)
+		existingIx := t.RepoSelector.FindData(core.NewQVariant1(repo.ID), int(core.Qt__UserRole), core.Qt__MatchExactly)
 		if existingIx == -1 {
-			t.RepoSelector.AddItem(repo.Url, core.NewQVariant1(repo.Id))
+			t.RepoSelector.AddItem(repo.Url, core.NewQVariant1(repo.ID))
 		}
 	}
-	ix := t.RepoSelector.FindData(core.NewQVariant1(currentRepo.Id), int(core.Qt__UserRole), core.Qt__MatchExactly)
+	ix := t.RepoSelector.FindData(core.NewQVariant1(currentRepo.ID), int(core.Qt__UserRole), core.Qt__MatchExactly)
 	if ix < 0 {
 		ix = 0 // if currentRepo is empty, set to first row.
 	}
@@ -124,8 +128,8 @@ func (t *RepoTab) Populate() {
 func (t *RepoTab) sshSelectorChanged(index int) {
 	switch index {
 	case 0:
-		currentProfile.SSHKey = sql.NullString{Valid:false}
-		currentProfile.SaveField("ssh_key")
+		currentProfile.SSHKey = sql.NullString{Valid: false}
+		models.DB.Save(currentProfile)
 	case 1:
 		dialog := NewSshAddDialog(t)
 		dialog.SetParent2(t, core.Qt__Sheet)
@@ -166,7 +170,7 @@ func (t *RepoTab) repoSelectorChanged(index int) {
 		dialog.SetParent2(t, core.Qt__Sheet)
 		dialog.ConnectAccepted(func() {
 			utils.Log.Info("New repo added.")
-			MainWindowChan <- utils.VEvent{Topic: "ChangeRepo", Message: string(currentRepo.Id)}
+			MainWindowChan <- utils.VEvent{Topic: "ChangeRepo", Message: string(currentRepo.ID)}
 		})
 		dialog.ConnectRejected(func() {
 			utils.Log.Info("Dialog Rejected")
@@ -178,7 +182,7 @@ func (t *RepoTab) repoSelectorChanged(index int) {
 		dialog.SetParent2(t, core.Qt__Sheet)
 		dialog.ConnectAccepted(func() {
 			utils.Log.Info("Existing repo added.")
-			MainWindowChan <- utils.VEvent{Topic: "ChangeRepo", Message: string(currentRepo.Id)}
+			MainWindowChan <- utils.VEvent{Topic: "ChangeRepo", Message: string(currentRepo.ID)}
 
 		})
 		dialog.ConnectRejected(func() {

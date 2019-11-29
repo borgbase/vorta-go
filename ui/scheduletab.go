@@ -3,6 +3,7 @@ package ui
 import (
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
+	"vorta/models"
 	"vorta/utils"
 )
 
@@ -22,7 +23,7 @@ func (t *ScheduleTab) init() {
 		for k, v := range schedulerRadioMap {
 			if v.IsChecked() {
 				currentProfile.ScheduleMode = k
-				currentProfile.SaveField("schedule_mode")
+				models.DB.Save(currentProfile)
 				break
 			}
 		}
@@ -32,11 +33,11 @@ func (t *ScheduleTab) init() {
 
 	t.PreBackupCmdLineEdit.ConnectTextChanged(func(text string) {
 		currentProfile.PreBackupCmd = text
-		currentProfile.SaveField("pre_backup_cmd")
+		models.DB.Save(currentProfile)
 	})
 	t.PostBackupCmdLineEdit.ConnectTextChanged(func(text string) {
 		currentProfile.PostBackupCmd = text
-		currentProfile.SaveField("post_backup_cmd")
+		models.DB.Save(currentProfile)
 	})
 }
 
@@ -62,6 +63,6 @@ func (t *ScheduleTab) Populate() {
 }
 
 func (t *ScheduleTab) setNextBackupTime() {
-	s := utils.Scheduler.NextTimeForProfile(currentProfile.Id)
+	s := utils.Scheduler.NextTimeForProfile(currentProfile.ID)
 	t.NextBackupDateTimeLabel.SetText(s)
 }

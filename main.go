@@ -32,7 +32,6 @@ func main() {
 	go w.RunUIEventHandler(app.AppChan)
 	go app.RunAppEventHandler(ui.MainWindowChan)
 	w.AddTabs()
-	utils.Log.Info("translated: ", app.QtApp.Translate("ArchiveTab", "Archives", "", -1))
 
 	widgets.QApplication_Exec()
 }

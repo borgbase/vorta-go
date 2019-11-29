@@ -2,7 +2,6 @@ package models
 
 import (
 	"database/sql"
-	"fmt"
 	"os"
 	"os/user"
 	"strings"
@@ -11,67 +10,53 @@ import (
 	"github.com/gosimple/slug"
 )
 
-var (
-	SqlAllProfiles            = "SELECT * FROM backupprofilemodel ORDER BY name ASC"
-	SqlProfileById            = "SELECT * FROM backupprofilemodel WHERE id=?"
-	SqlCountProfiles          = "SELECT count(*) from backupprofilemodel"
-	SqlRemoveProfileById      = `DELETE FROM backupprofilemodel WHERE id=?`
-	SqlUpdateProfileFieldById = `UPDATE backupprofilemodel SET %[1]v = :%[1]v WHERE id = :id;`
-	SqlAllSshKeys			  = `SELECT ssh_key FROM backupprofilemodel WHERE ssh_key NOT NULL`
-	SqlNewProfile             = `INSERT INTO "backupprofilemodel"
-					  VALUES (NULL, ?, (DATETIME('now')), NULL, NULL, 'zstd,3', '*/.DS_Store', '.nobackup', 
-							  'off', 1, 24, 17, 54, 1, 3, 0, 2, 7, 4, 6, 2, '', '{hostname}__{profile_slug}-{now}', 
-							  '{hostname}-{profile_slug}-', '', ''
-					)`
-)
-
 type Profile struct {
-	Id               int
-	Name             string
-	AddedAt          time.Time      `db:"added_at"`
-	RepoId           sql.NullInt64  `db:"repo_id"`
-	SSHKey           sql.NullString `db:"ssh_key"`
-	Compression      string
-	ExcludePatterns  sql.NullString `db:"exclude_patterns"`
-	ExcludeIfPresent sql.NullString `db:"exclude_if_present"`
+	ID               int            `gorm:"not null;primary_key"`
+	Name             string         `grom:"type:varchar(255)"`
+	AddedAt          time.Time      `gorm:"column:added_at;not null;default:CURRENT_TIMESTAMP"`
+	RepoId           sql.NullInt64  `gorm:"column:repo_id"`
+	Repo             Repo           `gorm:"foreignkey:RepoId"`
+	SSHKey           sql.NullString `gorm:"column:ssh_key;type:varchar(255)"`
+	Compression      string         `gorm:"type:varchar(255);not null;default:'zstd,3'"`
+	ExcludePatterns  sql.NullString `gorm:"column:exclude_patterns;default:'*/.DS_Store'"`
+	ExcludeIfPresent sql.NullString `gorm:"column:exclude_if_present;default:'.nobackup'"`
 
-	ScheduleMode            string `db:"schedule_mode"`
-	ScheduleIntervalHours   int    `db:"schedule_interval_hours"`
-	ScheduleIntervalMinutes int    `db:"schedule_interval_minutes"`
-	ScheduleFixedHour       int    `db:"schedule_fixed_hour"`
-	ScheduleFixedMinute     int    `db:"schedule_fixed_minute"`
+	ScheduleMode            string `gorm:"column:schedule_mode;type:varchar(255);not null;default:'off'"`
+	ScheduleIntervalHours   int    `gorm:"column:schedule_interval_hours;not null;default:1"`
+	ScheduleIntervalMinutes int    `gorm:"column:schedule_interval_minutes;not null;default:24"`
+	ScheduleFixedHour       int    `gorm:"column:schedule_fixed_hour;not null;default:17"`
+	ScheduleFixedMinute     int    `gorm:"column:schedule_fixed_minute;not null;default:54"`
 
-	ValidationOn    bool `db:"validation_on"`
-	ValidationWeeks int  `db:"validation_weeks"`
+	ValidationOn    bool `gorm:"column:validation_on;not null;default:1"`
+	ValidationWeeks int  `gorm:"column:validation_weeks;not null;default:3"`
 
-	PruneOn         bool           `db:"prune_on"`
-	PruneHour       int            `db:"prune_hour"`
-	PruneDay        int            `db:"prune_day"`
-	PruneWeek       int            `db:"prune_week"`
-	PruneMonth      int            `db:"prune_month"`
-	PruneYear       int            `db:"prune_year"`
-	PruneKeepWithin sql.NullString `db:"prune_keep_within"`
+	PruneOn         bool           `gorm:"column:prune_on;not null;default:0"`
+	PruneHour       int            `gorm:"column:prune_hour;not null;default:2"`
+	PruneDay        int            `gorm:"column:prune_day;not null;default:7"`
+	PruneWeek       int            `gorm:"column:prune_week;not null;default:4"`
+	PruneMonth      int            `gorm:"column:prune_month;not null;default:6"`
+	PruneYear       int            `gorm:"column:prune_year;not null;default:2"`
+	PruneKeepWithin sql.NullString `gorm:"column:prune_keep_within;type:varchar(255);default:''"`
 
-	NewArchiveName string `db:"new_archive_name"`
-	PrunePrefix    string `db:"prune_prefix"`
-	PreBackupCmd   string `db:"pre_backup_cmd"`
-	PostBackupCmd  string `db:"post_backup_cmd"`
+	NewArchiveName string      `gorm:"column:new_archive_name;type:varchar(255);not null;default:'{hostname}__{profile_slug}-{now}'"`
+	PrunePrefix    string      `gorm:"column:prune_prefix;type:varchar(255);not null;default:'{hostname}-{profile_slug}-'"`
+	PreBackupCmd   string      `gorm:"column:pre_backup_cmd;type:varchar(255);not null;default:''"`
+	PostBackupCmd  string      `gorm:"column:post_backup_cmd;type:varchar(255);not null;default:''"`
+	SourceDirs     []SourceDir `gorm:"foreignkey:ProfileId"`
 }
 
-func (p *Profile) GetRepo() *Repo {
-	r := Repo{}
-	DB.Get(&r, SqlRepoById, p.RepoId)
-	return &r
+//func (p *Profile) GetRepo() *Repo {
+//	r := Repo{}
+//	DB.Get(&r, SqlRepoById, p.RepoId)
+//	return &r
+//}
+
+func (Profile) TableName() string {
+	return "backupprofilemodel"
 }
 
 func (p *Profile) Slug() string {
 	return slug.Make(p.Name)
-}
-
-func (p *Profile) SaveField(field string) error {
-	Sql := fmt.Sprintf(SqlUpdateProfileFieldById, field)
-	_, err := DB.NamedExec(Sql, p)
-	return err
 }
 
 func (p *Profile) FormatArchiveName() string {
@@ -82,7 +67,7 @@ func (p *Profile) FormatArchiveName() string {
 	user, _ := user.Current()
 	r := strings.NewReplacer(
 		"{hostname}", hostname,
-		"{profile_id}", string(p.Id),
+		"{profile_id}", string(p.ID),
 		"{profile_slug}", p.Slug(),
 		"{now}", time.Now().Format(timeFormat),
 		"{now:%Y-%m-%dT%H:%M:%S}", time.Now().Format(timeFormat),
@@ -97,36 +82,3 @@ func (p *Profile) FormatArchiveName() string {
 		return time.Now().Format(timeFormat)
 	}
 }
-
-var SqlProfileSchema = `
-CREATE TABLE IF NOT EXISTS "backupprofilemodel"
-  (
-     "id"                        INTEGER NOT NULL PRIMARY KEY,
-     "name"                      VARCHAR(255) NOT NULL,
-     "added_at"                  DATETIME NOT NULL,
-     "repo_id"                   INTEGER,
-     "ssh_key"                   VARCHAR(255),
-     "compression"               VARCHAR(255) NOT NULL,
-     "exclude_patterns"          TEXT,
-     "exclude_if_present"        TEXT,
-     "schedule_mode"             VARCHAR(255) NOT NULL,
-     "schedule_interval_hours"   INTEGER NOT NULL,
-     "schedule_interval_minutes" INTEGER NOT NULL,
-     "schedule_fixed_hour"       INTEGER NOT NULL,
-     "schedule_fixed_minute"     INTEGER NOT NULL,
-     "validation_on"             INTEGER NOT NULL,
-     "validation_weeks"          INTEGER NOT NULL,
-     "prune_on"                  INTEGER NOT NULL,
-     "prune_hour"                INTEGER NOT NULL,
-     "prune_day"                 INTEGER NOT NULL,
-     "prune_week"                INTEGER NOT NULL,
-     "prune_month"               INTEGER NOT NULL,
-     "prune_year"                INTEGER NOT NULL,
-     "prune_keep_within"         VARCHAR(255),
-     "new_archive_name"          VARCHAR(255) NOT NULL,
-     "prune_prefix"              VARCHAR(255) NOT NULL,
-     "pre_backup_cmd"            VARCHAR(255) NOT NULL,
-     "post_backup_cmd"           VARCHAR(255) NOT NULL,
-     FOREIGN KEY ("repo_id") REFERENCES "repomodel" ("id")
-  );
-`

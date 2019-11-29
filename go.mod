@@ -10,8 +10,8 @@ require (
 	github.com/gopherjs/gopherjs v0.0.0-20191106031601-ce3c9ade29de // indirect
 	github.com/gosimple/slug v1.9.0
 	github.com/hashicorp/go-version v1.2.0
-	github.com/jinzhu/gorm v1.9.11 // indirect
-	github.com/jmoiron/sqlx v1.2.0
+	github.com/jinzhu/gorm v1.9.11
+	github.com/jmoiron/sqlx v1.2.0 // indirect
 	github.com/mattn/go-sqlite3 v1.12.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/robfig/cron/v3 v3.0.0

@@ -104,15 +104,16 @@ func (d *RepoAddDialog) ProcessNewRepo(_ bool) {
 				Encryption:         sql.NullString{d.EncryptionComboBox.CurrentData(int(core.Qt__UserRole)).ToString(), true},
 				ExtraBorgArguments: sql.NullString{d.ExtraBorgArgumentsLineEdit.Text(), true},
 			}
-			rows, err := models.DB.NamedExec(models.SqlNewRepo, newRepo)
-			if err != nil {
-				utils.Log.Error(err)
-			}
-			newRepoId, _ := rows.LastInsertId()
-			newRepo.Id = int(newRepoId)
+			//rows, err := models.DB.NamedExec(models.SqlNewRepo, newRepo)
+			models.DB.Create(&newRepo)
+			//if err != nil {
+			//	utils.Log.Error(err)
+			//}
+			//newRepoId, _ := rows.LastInsertId()
+			//newRepo.Id = int(newRepoId)
 			currentRepo = &newRepo
-			currentProfile.RepoId = sql.NullInt64{int64(currentRepo.Id), true}
-			currentProfile.SaveField("repo_id")
+			currentProfile.RepoId = sql.NullInt64{int64(currentRepo.ID), true}
+			models.DB.Save(currentProfile)
 			d.Accept()
 		}
 	}()
@@ -147,16 +148,17 @@ func (d *RepoAddDialog) ProcessExistingRepo(_ bool) {
 				TotalUniqueChunks:  sql.NullInt64{b.Result.GetPath("cache", "stats", "total_unique_chunks").MustInt64(), true},
 				ExtraBorgArguments: sql.NullString{d.ExtraBorgArgumentsLineEdit.Text(), true},
 			}
-			rows, err := models.DB.NamedExec(models.SqlNewRepo, newRepo)
-			if err != nil {
-				utils.Log.Error(err)
-			}
-
-			newRepoId, err := rows.LastInsertId()
-			newRepo.Id = int(newRepoId)
+			//rows, err := models.DB.NamedExec(models.SqlNewRepo, newRepo)
+			//if err != nil {
+			//	utils.Log.Error(err)
+			//}
+			//
+			//newRepoId, err := rows.LastInsertId()
+			//newRepo.Id = int(newRepoId)
+			models.DB.Create(&newRepo)
 			currentRepo = &newRepo
-			currentProfile.RepoId = sql.NullInt64{int64(currentRepo.Id), true}
-			currentProfile.SaveField("repo_id")
+			currentProfile.RepoId = sql.NullInt64{int64(currentRepo.ID), true}
+			models.DB.Save(currentProfile)
 			d.Accept()
 		}
 	}()

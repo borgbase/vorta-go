@@ -35,11 +35,11 @@ func (w *ArchiveTab) init() {
 
 	w.ArchiveNameTemplate.ConnectTextChanged(func(text string) {
 		currentProfile.NewArchiveName = text
-		currentProfile.SaveField("new_archive_name")
+		models.DB.Save(currentProfile)
 	})
 	w.PrunePrefixTemplate.ConnectTextChanged(func(text string) {
 		currentProfile.PrunePrefix = text
-		currentProfile.SaveField("prune_prefix")
+		models.DB.Save(currentProfile)
 	})
 
 	w.CheckButton.ConnectClicked(func(_ bool) {
@@ -61,7 +61,8 @@ func (w *ArchiveTab) init() {
 func (w *ArchiveTab) Populate() {
 	w.ToolBox.SetItemText(0, fmt.Sprintf("Archives for %s", currentRepo.Url))
 	archives := []models.Archive{}
-	err := models.DB.Select(&archives, models.SqlAllArchivesByRepoId, currentRepo.Id)
+	err := models.DB.Model(&currentRepo).Related(&archives)
+
 	if err != nil || len(archives) == 0 {
 		utils.Log.Error(err)
 		return

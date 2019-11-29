@@ -55,11 +55,11 @@ func (d *SshAddDialog) generateKey(_ bool) {
 		utils.Log.Error(err)
 		return
 	}
-	utils.CopyPublicKeyToClipboard(keyPath+".pub")
+	utils.CopyPublicKeyToClipboard(keyPath + ".pub")
 	d.Errors.SetText("New key was copied to clipboard and written to " + keyPath)
 }
 
 func (d *SshAddDialog) setOutputFilename(_ int) {
 	selectedFormat := d.FormatSelect.CurrentData(int(core.Qt__UserRole))
-	d.OutputFileTextBox.SetText(path.Join("id_"+selectedFormat.ToString()))
+	d.OutputFileTextBox.SetText(path.Join("id_" + selectedFormat.ToString()))
 }

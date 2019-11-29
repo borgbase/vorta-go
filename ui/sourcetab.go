@@ -10,19 +10,25 @@ func (t *SourceTab) init() {
 		utils.Log.Info("Add file triggered.")
 		ChooseFileDialog(func(files []string) {
 			utils.Log.Info(files)
-			var nExisting int
-			models.DB.Get(&nExisting, models.SqlCountSources, currentProfile.Id, files[0])
-			if nExisting == 0 {
-				t.SourceFilesWidget.AddItem(files[0])
-				models.DB.MustExec(models.SqlInsertSourceDir, files[0], currentProfile.Id)
+			for _, file := range files {
+				t.SourceFilesWidget.AddItem(file)
+				models.DB.Model(&currentProfile).Association("SourceDirs").Append(models.SourceDir{Dir: file})
 			}
+			//var nExisting int
+			//models.DB.Get(&nExisting, models.SqlCountSources, currentProfile.Id, files[0])
+			//models.DB.Model(&currentProfile).Association("SourceDirs").Count()
+			//
+			//if nExisting == 0 {
+			//	t.SourceFilesWidget.AddItem(files[0])
+			//	models.DB.MustExec(models.SqlInsertSourceDir, files[0], currentProfile.Id)
+			//}
 		})
 	})
 
 	t.SourceRemove.ConnectClicked(func(_ bool) {
 		item := t.SourceFilesWidget.TakeItem(t.SourceFilesWidget.CurrentRow())
+		models.DB.Model(&currentProfile).Association("SourceDirs").Delete(models.SourceDir{Dir: item.Text()})
 		utils.Log.Info(item.Text())
-		models.DB.MustExec(models.SqlDeleteSourceDir, currentProfile.Id, item.Text())
 	})
 }
 
@@ -36,7 +42,8 @@ func (t *SourceTab) Populate() {
 	}
 
 	ss := []models.SourceDir{}
-	models.DB.Select(&ss, models.SqlAllSourcesByProfileId, currentProfile.Id)
+	models.DB.Model(&currentProfile).Related(&ss)
+
 	for _, s := range ss {
 		t.SourceFilesWidget.AddItem(s.Dir)
 	}
@@ -51,9 +58,8 @@ func (t *SourceTab) Populate() {
 func (t *SourceTab) saveExcludes() {
 	currentProfile.ExcludePatterns.String = t.ExcludePatternsField.ToPlainText()
 	currentProfile.ExcludePatterns.Valid = true
-	currentProfile.SaveField("exclude_patterns")
 
 	currentProfile.ExcludeIfPresent.String = t.ExcludeIfPresentField.ToPlainText()
 	currentProfile.ExcludeIfPresent.Valid = true
-	currentProfile.SaveField("exclude_if_present")
+	models.DB.Save(currentProfile)
 }

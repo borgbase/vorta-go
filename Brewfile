@@ -1,0 +1,2 @@
+brew "qt"
+brew "go"

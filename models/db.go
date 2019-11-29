@@ -2,33 +2,29 @@ package models
 
 import (
 	"fmt"
-	"github.com/jmoiron/sqlx"
+	"github.com/jinzhu/gorm"
 	_ "github.com/mattn/go-sqlite3"
 	"path"
+	"time"
 )
 
-var DB *sqlx.DB
+var DB *gorm.DB
 
 func InitDb(dbPath string) {
 	var err error
-	DB, err = sqlx.Connect("sqlite3", path.Join(dbPath, "settings.db"))
-
-	DB.MustExec(SqlArchiveSchema)
-	DB.MustExec(SqlEvenLogSchema)
-	DB.MustExec(SqlProfileSchema)
-	DB.MustExec(SqlRepoSchema)
-	DB.MustExec(SqlSchemaVersionSchema)
-	DB.MustExec(SqlSettingsSchema)
-	DB.MustExec(SqlSourceDirSchema)
-
-	var nProfiles int
-	DB.Get(&nProfiles, SqlCountProfiles)
-	if nProfiles == 0 {
-		DB.MustExec(SqlNewProfile, "Default")
-	}
-
+	DB, err = gorm.Open("sqlite3", path.Join(dbPath, "settings.db"))
 	if err != nil {
 		fmt.Println(err)
 		panic("failed to connect database")
+	}
+
+	DB.AutoMigrate(&Archive{}, &Profile{}, &Repo{}, &SourceDir{})
+	//DB.LogMode(true)
+	var nProfiles int
+	DB.Model(&Profile{}).Count(&nProfiles)
+
+	if nProfiles == 0 {
+		var defaultProfile = Profile{Name: "Default", AddedAt: time.Now()}
+		DB.Create(&defaultProfile)
 	}
 }

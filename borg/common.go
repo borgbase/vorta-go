@@ -18,7 +18,7 @@ import (
 var (
 	borgProcessSlot = semaphore.NewWeighted(1)
 	AppEventChan    chan utils.VEvent
-	cmd *exec.Cmd
+	cmd             *exec.Cmd
 )
 
 type BorgRun struct {
@@ -135,7 +135,7 @@ func (r *BorgRun) Run() error {
 	stdOutResult := stdOutBuf.Bytes()
 	r.Result, err = simplejson.NewJson(stdOutResult)
 	if err != nil {
-		utils.Log.Error("Failed parsing JSON.", err)
+		utils.Log.Info("Failed parsing JSON.", err)
 		r.PlainTextResult = string(stdOutResult)
 	}
 
