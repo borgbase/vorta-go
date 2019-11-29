@@ -19,7 +19,7 @@ func InitDb(dbPath string) {
 	}
 
 	DB.AutoMigrate(&Archive{}, &Profile{}, &Repo{}, &SourceDir{})
-	//DB.LogMode(true)
+	DB.LogMode(true)
 	var nProfiles int
 	DB.Model(&Profile{}).Count(&nProfiles)
 

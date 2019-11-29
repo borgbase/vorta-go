@@ -79,7 +79,9 @@ func (w *MainWindow) profileSelectorChanged(ix int) {
 	utils.Log.Error("Using ID: ", id)
 	//models.DB.Get(currentProfile, models.SqlProfileById, id)
 	//models.DB.Get(currentRepo, models.SqlRepoById, currentProfile.RepoId)
-	models.DB.Where("id = ?", id).First(&currentProfile)
+	currentProfile = &models.Profile{ID: id}
+	models.DB.Take(&currentProfile)
+	currentRepo = &models.Repo{}
 	models.DB.Model(&currentProfile).Related(&currentRepo)
 	utils.Log.Error("Current profile: ", currentProfile.ID)
 	w.refreshAllTabs()
