@@ -19,7 +19,8 @@ func NewCreateRun(profile *models.Profile) (*CreateRun, error) {
 	r.SubCommand = "create"
 	r.SubCommandArgs = []string{"--json", "--list", "--filter=AM", "-C", profile.Compression}
 	r.Profile = profile
-	models.DB.Model(&profile).Related(&r.Repo)
+	r.Repo = &models.Repo{}
+	models.DB.Model(profile).Related(r.Repo)
 
 	// Do global preparations
 	err := r.Prepare()
@@ -71,9 +72,9 @@ func NewCreateRun(profile *models.Profile) (*CreateRun, error) {
 func (r *CreateRun) ProcessResult() {
 	// Save new archive
 	newArchive := models.Archive{}
-	newArchive.ArchiveId = r.Result.GetPath("archive", "id").MustString()
+	newArchive.ArchiveID = r.Result.GetPath("archive", "id").MustString()
 	newArchive.Name = r.Result.GetPath("archive", "name").MustString()
-	newArchive.RepoId = r.Repo.ID
+	newArchive.RepoID = r.Repo.ID
 	newArchive.Duration = sql.NullFloat64{r.Result.GetPath("archive", "duration").MustFloat64(), true}
 	newArchive.Size = sql.NullInt64{r.Result.GetPath("archive", "duration").MustInt64(), true}
 	models.DB.Create(newArchive)

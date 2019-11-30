@@ -5,7 +5,6 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/mattn/go-sqlite3"
 	"path"
-	"time"
 )
 
 var DB *gorm.DB
@@ -24,7 +23,7 @@ func InitDb(dbPath string) {
 	DB.Model(&Profile{}).Count(&nProfiles)
 
 	if nProfiles == 0 {
-		var defaultProfile = Profile{Name: "Default", AddedAt: time.Now()}
+		var defaultProfile = NewProfile("Default")
 		DB.Create(&defaultProfile)
 	}
 }

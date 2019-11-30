@@ -133,6 +133,7 @@ func (r *BorgRun) Run() error {
 
 	// Try to parse json stdout
 	stdOutResult := stdOutBuf.Bytes()
+	utils.Log.Info(stdOutResult)
 	r.Result, err = simplejson.NewJson(stdOutResult)
 	if err != nil {
 		utils.Log.Info("Failed parsing JSON.", err)

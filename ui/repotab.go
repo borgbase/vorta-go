@@ -65,7 +65,7 @@ func (t *RepoTab) unlinkRepo(_ bool) {
 		t.RepoSelector.DisconnectCurrentIndexChanged()
 		utils.Log.Info("Unlinking repo %v", currentRepo.Url)
 		//currentRepoId := currentRepo.ID
-		currentProfile.RepoId = sql.NullInt64{Valid: false}
+		currentProfile.RepoID = sql.NullInt64{Valid: false}
 		//currentProfile.SaveField("repo_id")
 		models.DB.Save(&currentProfile)
 		//models.DB.MustExec(models.SqlRemoveRepoById, currentRepoId)
@@ -91,8 +91,9 @@ func (t *RepoTab) setStats() {
 }
 
 func (t *RepoTab) Populate() {
+	t.RepoSelector.DisconnectCurrentIndexChanged()
+	t.RepoCompression.DisconnectCurrentIndexChanged()
 	rr := []models.Repo{}
-	//models.DB.Select(&rr, models.SqlAllRepos)
 	models.DB.Find(&rr)
 	for _, repo := range rr {
 		// see if repo already exists, otherwise add it.
@@ -123,6 +124,8 @@ func (t *RepoTab) Populate() {
 
 	t.setStats()
 	t.setCompression()
+	t.RepoCompression.ConnectCurrentIndexChanged(t.compressionSelectorChanged)
+	t.RepoSelector.ConnectCurrentIndexChanged(t.repoSelectorChanged)
 }
 
 func (t *RepoTab) sshSelectorChanged(index int) {

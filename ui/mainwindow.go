@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
-	"time"
 	"vorta/app"
 	"vorta/borg"
 	"vorta/models"
@@ -75,15 +74,12 @@ func (w *MainWindow) AddTabs() {
 }
 
 func (w *MainWindow) profileSelectorChanged(ix int) {
+	utils.Log.Info("Running profileselctorchanged")
 	id := w.ProfileSelector.ItemData(ix, int(core.Qt__UserRole)).ToInt(nil)
-	utils.Log.Error("Using ID: ", id)
-	//models.DB.Get(currentProfile, models.SqlProfileById, id)
-	//models.DB.Get(currentRepo, models.SqlRepoById, currentProfile.RepoId)
 	currentProfile = &models.Profile{ID: id}
 	models.DB.Take(&currentProfile)
 	currentRepo = &models.Repo{}
 	models.DB.Model(&currentProfile).Related(&currentRepo)
-	utils.Log.Error("Current profile: ", currentProfile.ID)
 	w.refreshAllTabs()
 }
 
@@ -104,7 +100,7 @@ func (w *MainWindow) addProfile(_ bool) {
 	dialog.SetParent2(w, core.Qt__Sheet)
 	dialog.ConnectAccepted(func() {
 		utils.Log.Info("profile added")
-		currentProfile = &models.Profile{Name: dialog.ProfileNameField.Text(), AddedAt: time.Now()}
+		currentProfile = models.NewProfile(dialog.ProfileNameField.Text())
 		models.DB.Create(currentProfile)
 		w.ProfileSelector.AddItem(currentProfile.Name, core.NewQVariant1(currentProfile.ID))
 		ix := w.ProfileSelector.FindData(core.NewQVariant1(currentProfile.ID), int(core.Qt__UserRole), core.Qt__MatchExactly)
@@ -148,7 +144,7 @@ func (w *MainWindow) removeProfile(_ bool) {
 		if nProfiles == 0 {
 			//rows, _ := models.DB.Exec(models.SqlNewProfile, "Default")
 			//newID, _ := rows.LastInsertId()
-			var currentProfile = models.Profile{Name: "Default", AddedAt: time.Now()}
+			var currentProfile = models.NewProfile("Default")
 			models.DB.Create(&currentProfile)
 			w.ProfileSelector.AddItem("Default", core.NewQVariant1(currentProfile.ID))
 		}
@@ -162,13 +158,10 @@ func (w *MainWindow) RunUIEventHandler(appChan chan utils.VEvent) {
 			w.displayLogMessage(e.Message)
 		case "ChangeRepo":
 			utils.Log.Info("Repo changed")
-			//err := models.DB.Get(currentRepo, models.SqlRepoById, e.Message)
 			err := models.DB.Where("id = ?", e.Message).First(&currentRepo)
 			utils.Log.Info("currentRepo val:", currentRepo)
 			if err == nil {
 				models.DB.Model(&currentProfile).Association("Repo").Replace(currentRepo)
-				//currentProfile.RepoId = sql.NullInt64{int64(currentRepo.Id), true}
-				//models.DB.NamedExec(fmt.Sprintf(models.SqlUpdateProfileFieldById, "repo_id"), currentProfile)
 			}
 			w.refreshAllTabs()
 		case "StartBackup":

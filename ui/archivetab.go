@@ -8,7 +8,6 @@ import (
 	"time"
 	"vorta/borg"
 	"vorta/models"
-	"vorta/utils"
 )
 
 var (
@@ -33,14 +32,8 @@ func (w *ArchiveTab) init() {
 	w.ArchiveTable.SetAlternatingRowColors(true)
 	w.ArchiveTable.SetTextElideMode(core.Qt__TextElideMode(core.Qt__ElideLeft))
 
-	w.ArchiveNameTemplate.ConnectTextChanged(func(text string) {
-		currentProfile.NewArchiveName = text
-		models.DB.Save(currentProfile)
-	})
-	w.PrunePrefixTemplate.ConnectTextChanged(func(text string) {
-		currentProfile.PrunePrefix = text
-		models.DB.Save(currentProfile)
-	})
+	w.ArchiveNameTemplate.ConnectTextChanged(w.archiveNameTemplateChanged)
+	w.PrunePrefixTemplate.ConnectTextChanged(w.prunePrefixTemplateChanged)
 
 	w.CheckButton.ConnectClicked(func(_ bool) {
 		r, err := borg.NewCheckRun(currentProfile)
@@ -58,13 +51,31 @@ func (w *ArchiveTab) init() {
 	})
 }
 
+func (w *ArchiveTab) archiveNameTemplateChanged(text string) {
+	currentProfile.NewArchiveName = text
+	models.DB.Save(currentProfile)
+}
+
+func (w *ArchiveTab) prunePrefixTemplateChanged(text string) {
+	currentProfile.PrunePrefix = text
+	models.DB.Save(currentProfile)
+}
+
 func (w *ArchiveTab) Populate() {
+	// Deal with archive name options
+	w.ArchiveNameTemplate.DisconnectTextChanged()
+	w.PrunePrefixTemplate.DisconnectTextChanged()
+	w.ArchiveNameTemplate.SetText(currentProfile.NewArchiveName)
+	w.PrunePrefixTemplate.SetText(currentProfile.PrunePrefix)
+	w.ArchiveNameTemplate.ConnectTextChanged(w.archiveNameTemplateChanged)
+	w.PrunePrefixTemplate.ConnectTextChanged(w.prunePrefixTemplateChanged)
+
+	// Populate archive table
 	w.ToolBox.SetItemText(0, fmt.Sprintf("Archives for %s", currentRepo.Url))
 	archives := []models.Archive{}
-	err := models.DB.Model(&currentRepo).Related(&archives)
+	models.DB.Model(&currentRepo).Related(&archives)
 
-	if err != nil || len(archives) == 0 {
-		utils.Log.Error(err)
+	if len(archives) == 0 {
 		return
 	}
 	w.ArchiveTable.SetRowCount(len(archives))
@@ -78,6 +89,6 @@ func (w *ArchiveTab) Populate() {
 		w.ArchiveTable.SetItem(row, 4, widgets.NewQTableWidgetItem2(archive.Name, 0))
 	}
 	w.ArchiveTable.ResizeColumnsToContents()
-	w.ArchiveNameTemplate.SetText(currentProfile.NewArchiveName)
-	w.PrunePrefixTemplate.SetText(currentProfile.PrunePrefix)
+
+
 }

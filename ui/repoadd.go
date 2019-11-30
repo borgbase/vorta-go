@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/therecipe/qt/core"
 	"regexp"
+	"time"
 	"vorta/borg"
 	"vorta/models"
 	"vorta/utils"
@@ -101,6 +102,7 @@ func (d *RepoAddDialog) ProcessNewRepo(_ bool) {
 			utils.Log.Info(b.Result)
 			newRepo := models.Repo{
 				Url:                d.RepoURL.Text(),
+				AddedAt:			time.Now(),
 				Encryption:         sql.NullString{d.EncryptionComboBox.CurrentData(int(core.Qt__UserRole)).ToString(), true},
 				ExtraBorgArguments: sql.NullString{d.ExtraBorgArgumentsLineEdit.Text(), true},
 			}
@@ -112,7 +114,7 @@ func (d *RepoAddDialog) ProcessNewRepo(_ bool) {
 			//newRepoId, _ := rows.LastInsertId()
 			//newRepo.Id = int(newRepoId)
 			currentRepo = &newRepo
-			currentProfile.RepoId = sql.NullInt64{int64(currentRepo.ID), true}
+			currentProfile.RepoID = sql.NullInt64{int64(currentRepo.ID), true}
 			models.DB.Save(currentProfile)
 			d.Accept()
 		}
@@ -141,6 +143,7 @@ func (d *RepoAddDialog) ProcessExistingRepo(_ bool) {
 			utils.Log.Info(b.Result)
 			newRepo := models.Repo{
 				Url:                d.RepoURL.Text(),
+				AddedAt:            time.Now(),
 				Encryption:         sql.NullString{b.Result.GetPath("encryption", "mode").MustString(), true},
 				UniqueSize:         sql.NullInt64{b.Result.GetPath("cache", "stats", "unique_size").MustInt64(), true},
 				UniqueCsize:        sql.NullInt64{b.Result.GetPath("cache", "stats", "unique_csize").MustInt64(), true},
@@ -148,16 +151,9 @@ func (d *RepoAddDialog) ProcessExistingRepo(_ bool) {
 				TotalUniqueChunks:  sql.NullInt64{b.Result.GetPath("cache", "stats", "total_unique_chunks").MustInt64(), true},
 				ExtraBorgArguments: sql.NullString{d.ExtraBorgArgumentsLineEdit.Text(), true},
 			}
-			//rows, err := models.DB.NamedExec(models.SqlNewRepo, newRepo)
-			//if err != nil {
-			//	utils.Log.Error(err)
-			//}
-			//
-			//newRepoId, err := rows.LastInsertId()
-			//newRepo.Id = int(newRepoId)
 			models.DB.Create(&newRepo)
 			currentRepo = &newRepo
-			currentProfile.RepoId = sql.NullInt64{int64(currentRepo.ID), true}
+			currentProfile.RepoID = sql.NullInt64{int64(currentRepo.ID), true}
 			models.DB.Save(currentProfile)
 			d.Accept()
 		}

@@ -10,25 +10,52 @@ import (
 	"github.com/gosimple/slug"
 )
 
+func NewProfile(name string) *Profile {
+	profile := Profile{}
+	profile.Name = name
+	profile.AddedAt = time.Now()
+	profile.Compression = "zstd,3"
+	profile.ExcludePatterns = sql.NullString{String: "*/.DS_Store", Valid:true}
+	profile.ExcludeIfPresent = sql.NullString{String: ".nobackup", Valid:true}
+	profile.ScheduleMode = "off"
+	profile.ScheduleIntervalHours = 1
+	profile.ScheduleIntervalMinutes = 24
+	profile.ScheduleFixedHour = 17
+	profile.ScheduleFixedMinute = 54
+	profile.ValidationOn = true
+	profile.ValidationWeeks = 3
+	profile.PruneOn = false
+	profile.PruneHour = 2
+	profile.PruneDay = 7
+	profile.PruneWeek = 4
+	profile.PruneMonth = 6
+	profile.PruneKeepWithin = sql.NullString{String: "", Valid:  true}
+	profile.NewArchiveName = "{hostname}__{profile_slug}-{now}"
+	profile.PrunePrefix = "{hostname}-{profile_slug}-"
+	profile.PreBackupCmd = ""
+	profile.PostBackupCmd = ""
+	return &profile
+}
+
 type Profile struct {
 	ID               int            `gorm:"not null;primary_key"`
 	Name             string         `grom:"type:varchar(255)"`
-	AddedAt          time.Time      `gorm:"column:added_at;not null;default:CURRENT_TIMESTAMP"`
-	RepoId           sql.NullInt64  `gorm:"column:repo_id"`
-	Repo             Repo           `gorm:"foreignkey:RepoId"`
+	AddedAt          time.Time      `gorm:"column:added_at;not null"`
+	RepoID           sql.NullInt64  `gorm:"column:repo_id"`
+	Repo             Repo           `gorm:"foreignkey:RepoID"`
 	SSHKey           sql.NullString `gorm:"column:ssh_key;type:varchar(255)"`
-	Compression      string         `gorm:"type:varchar(255);not null;default:'zstd,3'"`
-	ExcludePatterns  sql.NullString `gorm:"column:exclude_patterns;default:'*/.DS_Store'"`
-	ExcludeIfPresent sql.NullString `gorm:"column:exclude_if_present;default:'.nobackup'"`
+	Compression      string         `gorm:"type:varchar(255);not null"`
+	ExcludePatterns  sql.NullString `gorm:"column:exclude_patterns"`
+	ExcludeIfPresent sql.NullString `gorm:"column:exclude_if_present"`
 
-	ScheduleMode            string `gorm:"column:schedule_mode;type:varchar(255);not null;default:'off'"`
-	ScheduleIntervalHours   int    `gorm:"column:schedule_interval_hours;not null;default:1"`
-	ScheduleIntervalMinutes int    `gorm:"column:schedule_interval_minutes;not null;default:24"`
-	ScheduleFixedHour       int    `gorm:"column:schedule_fixed_hour;not null;default:17"`
-	ScheduleFixedMinute     int    `gorm:"column:schedule_fixed_minute;not null;default:54"`
+	ScheduleMode            string `gorm:"column:schedule_mode;type:varchar(255);not null"`
+	ScheduleIntervalHours   int    `gorm:"column:schedule_interval_hours;not null"`
+	ScheduleIntervalMinutes int    `gorm:"column:schedule_interval_minutes;not null"`
+	ScheduleFixedHour       int    `gorm:"column:schedule_fixed_hour;not null"`
+	ScheduleFixedMinute     int    `gorm:"column:schedule_fixed_minute;not null"`
 
-	ValidationOn    bool `gorm:"column:validation_on;not null;default:1"`
-	ValidationWeeks int  `gorm:"column:validation_weeks;not null;default:3"`
+	ValidationOn    bool `gorm:"column:validation_on;not null"`
+	ValidationWeeks int  `gorm:"column:validation_weeks;not null"`
 
 	PruneOn         bool           `gorm:"column:prune_on;not null;default:0"`
 	PruneHour       int            `gorm:"column:prune_hour;not null;default:2"`
@@ -38,10 +65,10 @@ type Profile struct {
 	PruneYear       int            `gorm:"column:prune_year;not null;default:2"`
 	PruneKeepWithin sql.NullString `gorm:"column:prune_keep_within;type:varchar(255);default:''"`
 
-	NewArchiveName string      `gorm:"column:new_archive_name;type:varchar(255);not null;default:'{hostname}__{profile_slug}-{now}'"`
-	PrunePrefix    string      `gorm:"column:prune_prefix;type:varchar(255);not null;default:'{hostname}-{profile_slug}-'"`
-	PreBackupCmd   string      `gorm:"column:pre_backup_cmd;type:varchar(255);not null;default:''"`
-	PostBackupCmd  string      `gorm:"column:post_backup_cmd;type:varchar(255);not null;default:''"`
+	NewArchiveName string      `gorm:"column:new_archive_name;type:varchar(255);not null"`
+	PrunePrefix    string      `gorm:"column:prune_prefix;type:varchar(255);not null"`
+	PreBackupCmd   string      `gorm:"column:pre_backup_cmd;type:varchar(255);not null"`
+	PostBackupCmd  string      `gorm:"column:post_backup_cmd;type:varchar(255);not null"`
 	SourceDirs     []SourceDir `gorm:"foreignkey:ProfileId"`
 }
 
