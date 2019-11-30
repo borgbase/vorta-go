@@ -12,6 +12,7 @@ func NewCheckRun(profile *models.Profile) (*CheckRun, error) {
 	r := &CheckRun{}
 	r.SubCommand = "check"
 	r.Profile = profile
+	r.Repo = &models.Repo{}
 	models.DB.Model(&profile).Related(&r.Repo)
 
 	err := r.Prepare()

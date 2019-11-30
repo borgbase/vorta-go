@@ -180,6 +180,12 @@ func (w *MainWindow) RunUIEventHandler(appChan chan utils.VEvent) {
 			} else {
 				w.displayLogMessage("Borg binary was found and is ready for use.")
 			}
+		case "BorgRunStart":
+			w.CreateStartBtn.SetDisabled(true)
+			w.CancelButton.SetDisabled(false)
+		case "BorgRunStop":
+			w.CreateStartBtn.SetDisabled(false)
+			w.CancelButton.SetDisabled(true)
 		default:
 			utils.Log.Info("Unhandled UI Channel Event")
 		}

@@ -12,11 +12,11 @@ Borg Commands:
 - [x] `info`
 - [x] `check`
 - [ ] `extract`
-- [ ] `mount`
+- [x] `mount`
 - [ ] `delete`
 - [ ] `diff`
 - [ ] `list-archive`
-- [ ] `list-repo`
+- [x] `list-repo`
 - [ ] `prune`
 - [ ] `umount`
 - [x] `version`
@@ -80,7 +80,7 @@ For Linux, Qt5 is linked dynamically to match your distro's look and feel. Insta
 - Archlinux: `$ pacman -S qt5`
 - Fedora: `$ yum install qt5-qtbase`
 
-## Translations
+## Translations (work in progress)
 - extract strings: `lupdate -extensions ui ui/*.ui -ts qml/i18n/ui_en.ts`
 - merge .ts files: `lconvert -i primary.ts secondary.ts -o complete.ts` 
 - compile .ts to .qm: `lrelease qml/i18n/ui_de.ts -qm qml/i18n/ui_de.qm`

@@ -49,6 +49,41 @@ func (w *ArchiveTab) init() {
 			}
 		}()
 	})
+
+	w.MountButton.ConnectClicked(func(_ bool) {
+		ChooseFileDialog(func(files []string) {
+			r, err := borg.NewMountRun(currentProfile)
+			r.SubCommandArgs = append(r.SubCommandArgs, files[0])
+			if err != nil {
+				w.MountErrors.SetText(err.Error())
+				return
+			}
+			w.MountErrors.SetText("Mounting archive...")
+			go func() {
+				err := r.Run()
+				if err != nil {
+					w.MountErrors.SetText(err.Error())
+				}
+				w.MountErrors.SetText("Archive mounted.")
+			}()
+		})
+	})
+
+	w.ListButton.ConnectClicked(func(_ bool) {
+		r, err := borg.NewListRepoRun(currentProfile)
+		if err != nil {
+			w.MountErrors.SetText(err.Error())
+			return
+		}
+		go func() {
+			err := r.Run()
+			if err != nil {
+				w.MountErrors.SetText(err.Error())
+			}
+			r.ProcessResult()
+			w.Populate()
+		}()
+	})
 }
 
 func (w *ArchiveTab) archiveNameTemplateChanged(text string) {
@@ -73,12 +108,13 @@ func (w *ArchiveTab) Populate() {
 	// Populate archive table
 	w.ToolBox.SetItemText(0, fmt.Sprintf("Archives for %s", currentRepo.Url))
 	archives := []models.Archive{}
-	models.DB.Model(&currentRepo).Related(&archives)
+	models.DB.Order("time desc").Model(&currentRepo).Related(&archives)
+
+	w.ArchiveTable.SetRowCount(len(archives))
 
 	if len(archives) == 0 {
 		return
 	}
-	w.ArchiveTable.SetRowCount(len(archives))
 
 	for row, archive := range archives {
 		w.ArchiveTable.SetItem(row, 0, widgets.NewQTableWidgetItem2(archive.CreatedAt.Format(_timeFormat), 0))

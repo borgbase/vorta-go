@@ -7,7 +7,6 @@ import (
 	"github.com/bitly/go-simplejson"
 	"io"
 	"vorta/utils"
-
 	"errors"
 	"golang.org/x/sync/semaphore"
 	"os"
@@ -78,9 +77,11 @@ func (r *BorgRun) Prepare() error {
 }
 
 func (r *BorgRun) Run() error {
+
 	mergedArgs := append(r.CommonBorgArgs, r.SubCommand)
 	mergedArgs = append(mergedArgs, r.SubCommandArgs...)
 	utils.Log.Info("Running command: ", r.Bin.Path, mergedArgs)
+	AppEventChan <- utils.VEvent{Topic: "BorgRunStart"}
 	cmd = exec.Command(
 		r.Bin.Path,
 		mergedArgs...,
@@ -129,11 +130,10 @@ func (r *BorgRun) Run() error {
 		AppEventChan <- utils.VEvent{Topic: "StatusUpdate", Message: "Borg finished with errors."}
 		return err
 	}
-	AppEventChan <- utils.VEvent{Topic: "StatusUpdate", Message: "Finished command without errors"}
+	AppEventChan <- utils.VEvent{Topic: "BorgRunStop"}
 
 	// Try to parse json stdout
 	stdOutResult := stdOutBuf.Bytes()
-	utils.Log.Info(stdOutResult)
 	r.Result, err = simplejson.NewJson(stdOutResult)
 	if err != nil {
 		utils.Log.Info("Failed parsing JSON.", err)
@@ -148,6 +148,7 @@ func (r *BorgRun) ProcessResult() {
 }
 
 func CancelBorgRun() {
+	AppEventChan <- utils.VEvent{Topic: "BorgRunStop"}
 	if borgProcessSlot.TryAcquire(1) {
 		borgProcessSlot.Release(1)
 		// No borg process is running.
