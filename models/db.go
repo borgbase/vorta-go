@@ -17,7 +17,7 @@ func InitDb(dbPath string) {
 		panic("failed to connect database")
 	}
 
-	DB.AutoMigrate(&Archive{}, &Profile{}, &Repo{}, &SourceDir{})
+	DB.AutoMigrate(&Archive{}, &Profile{}, &Repo{}, &SourceDir{}, &KnownWifi{})
 	DB.LogMode(true)
 	var nProfiles int
 	DB.Model(&Profile{}).Count(&nProfiles)

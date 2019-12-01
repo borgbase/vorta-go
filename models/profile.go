@@ -70,13 +70,9 @@ type Profile struct {
 	PreBackupCmd   string      `gorm:"column:pre_backup_cmd;type:varchar(255);not null"`
 	PostBackupCmd  string      `gorm:"column:post_backup_cmd;type:varchar(255);not null"`
 	SourceDirs     []SourceDir `gorm:"foreignkey:ProfileId"`
-}
 
-//func (p *Profile) GetRepo() *Repo {
-//	r := Repo{}
-//	DB.Get(&r, SqlRepoById, p.RepoId)
-//	return &r
-//}
+	KnownWifis		[]KnownWifi	`gorm:"foreignkey:ProfileID"`
+}
 
 func (Profile) TableName() string {
 	return "backupprofilemodel"

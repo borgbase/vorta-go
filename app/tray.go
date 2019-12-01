@@ -42,10 +42,10 @@ func (t *systemTray) drawMenu() {
 	pp := []models.Profile{}
 	models.DB.Find(&pp)
 	for _, p := range pp {
-		profile := &p
-		profileMenu.AddAction(p.Name).ConnectTriggered(func(checked bool) {
+		profile := p
+		profileMenu.AddAction(p.Name).ConnectTriggered(func(_ bool) {
 			utils.Log.Infof("Backup triggered for profile: %v", profile.Name)
-			AppChan <- utils.VEvent{Topic: "StartBackup", Profile: profile}
+			AppChan <- utils.VEvent{Topic: "StartBackup", Profile: &profile}
 		})
 	}
 

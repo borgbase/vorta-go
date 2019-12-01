@@ -1,23 +1,27 @@
 package utils
 
 import (
-	"fmt"
 	"howett.net/plist"
 	"os"
+	"time"
+	"vorta/models"
 )
 
 const wifiPlist = "/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist"
 
-type sparseBundleHeader struct {
-	InfoDictionaryVersion string `plist:"CFBundleInfoDictionaryVersion"`
-	BandSize              uint64 `plist:"band-size"`
-	BackingStoreVersion   int    `plist:"bundle-backingstore-version"`
-	DiskImageBundleType   string `plist:"diskimage-bundle-type"`
-	Size                  uint64 `plist:"size"`
+type knownNetwork struct {
+	AddedAt time.Time `plist:"AddedAt"`
+	SSIDString   string `plist:"SSIDString"`
 }
 
+type appleAirportPreferences struct {
+	KnownNetworks  map[string]knownNetwork `plist:"KnownNetworks"`
+}
+
+// Read plist of known Wifis and save them to settings DB.
+// from https://godoc.org/howett.net/plist#example-Decoder-Decode
 func UpdateWifiList() {
-	var data sparseBundleHeader
+	var data appleAirportPreferences
 
 	f, err := os.Open(wifiPlist)
 	if err != nil {
@@ -28,6 +32,17 @@ func UpdateWifiList() {
 	if err != nil {
 		Log.Error(err)
 	}
-	fmt.Println(data)
-
+	for _, network := range data.KnownNetworks {
+		pp := []models.Profile{}
+		models.DB.Find(&pp)
+		for _, profile := range pp {
+			newNetwork := models.KnownWifi{
+				SSID:          network.SSIDString,
+				LastConnected: network.AddedAt,
+				Allowed:       true,
+				ProfileID:     profile.ID,
+			}
+			models.DB.FirstOrCreate(&newNetwork, newNetwork)
+		}
+	}
 }

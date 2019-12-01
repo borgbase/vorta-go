@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"github.com/gen2brain/beeep"
 	"github.com/robfig/cron/v3"
 	"vorta/models"
 )
@@ -57,7 +58,7 @@ func (s *SchedulerCls) NextTimeForProfile(profileId int) string {
 	if !jobExists {
 		return "None found"
 	}
-
+	// TODO: shows different profile after disabling in scheduler?
 	ee := s.Cron.Entries()
 	for _, e := range ee {
 		Log.Info(e, entry, e.ID)
@@ -74,5 +75,14 @@ type VortaJob struct {
 }
 
 func (j VortaJob) Run() {
-	Scheduler.AppChan <- VEvent{Topic: "StartBackupxx", Message: string(j.ProfileId)}
+	profile := models.Profile{}
+	models.DB.First(&profile, j.ProfileId)
+	err := beeep.Notify(
+		"Vorta Backup",
+		"Starting Backup for Profile " + profile.Name,
+		"assets/information.png")
+	if err != nil {
+		panic(err)
+	}
+	Scheduler.AppChan <- VEvent{Topic: "StartBackup", Profile: &profile}
 }

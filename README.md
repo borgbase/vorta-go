@@ -11,14 +11,14 @@ Borg Commands:
 - [x] `create`
 - [x] `info`
 - [x] `check`
-- [ ] `extract`
+- [ ] [`extract`](https://github.com/therecipe/examples/blob/master/advanced/widgets/treeview/main.go)
 - [x] `mount`
 - [ ] `delete`
 - [ ] `diff`
 - [ ] `list-archive`
 - [x] `list-repo`
 - [ ] `prune`
-- [ ] `umount`
+- [ ] `umount` and mount status
 - [x] `version`
 
 Backend Functionality
@@ -28,10 +28,14 @@ Backend Functionality
 - [x] Read and parse existing SSH keys
 - [x] Create new SSH key
 - [x] Check Borg version for available features
-- [ ] Tests
-- [ ] Read list of WiFis
+- [ ] [Tests](https://github.com/therecipe/examples/tree/master/test/widgets)
+- [x] Read list of WiFis
+- [ ] Check Wifi before scheduled backup
 - [ ] Password fallback to database
 - [ ] Translations
+- [x] Notifications from scheduler
+- [ ] Settings functionality
+- [ ] Offer to install Borg CLI
 
 Packaging (via Docker)
 - [x] macOS

@@ -76,7 +76,7 @@ func (r *CreateRun) ProcessResult() {
 	newArchive.Name = r.Result.GetPath("archive", "name").MustString()
 	newArchive.RepoID = r.Repo.ID
 	newArchive.Duration = sql.NullFloat64{r.Result.GetPath("archive", "duration").MustFloat64(), true}
-	newArchive.Size = sql.NullInt64{r.Result.GetPath("archive", "duration").MustInt64(), true}
+	newArchive.Size = sql.NullInt64{r.Result.GetPath("archive", "stats", "deduplicated_size").MustInt64(), true}
 	models.DB.Create(&newArchive)
 
 	// Update repo space stats

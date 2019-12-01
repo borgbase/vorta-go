@@ -23,8 +23,9 @@ func main() {
 	models.InitDb(utils.ConfigDir.UserData())
 	app.InitApp()
 	app.AppChan = make(chan utils.VEvent)
-	borg.AppEventChan = app.AppChan //TODO: InitBorg and check version.
-	utils.InitScheduler(app.AppChan)
+	borg.AppEventChan = app.AppChan
+	go utils.InitScheduler(app.AppChan)
+	go utils.UpdateWifiList()
 
 	defer models.DB.Close()
 

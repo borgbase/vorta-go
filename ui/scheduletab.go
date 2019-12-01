@@ -3,6 +3,7 @@ package ui
 import (
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
+	"strconv"
 	"vorta/models"
 	"vorta/utils"
 )
@@ -19,6 +20,12 @@ func (t *ScheduleTab) init() {
 	}
 
 	t.ScheduleApplyButton.ConnectClicked(func(_ bool) {
+		currentProfile.ScheduleIntervalHours, _ = strconv.Atoi(t.ScheduleIntervalHours.Text())
+		currentProfile.ScheduleIntervalMinutes, _ = strconv.Atoi(t.ScheduleIntervalMinutes.Text())
+		currentProfile.ScheduleFixedHour = t.ScheduleFixedTime.Time().Hour()
+		currentProfile.ScheduleFixedMinute = t.ScheduleFixedTime.Time().Minute()
+		models.DB.Save(currentProfile)
+
 		utils.Log.Info("Applying new schedule.")
 		for k, v := range schedulerRadioMap {
 			if v.IsChecked() {
@@ -60,6 +67,33 @@ func (t *ScheduleTab) Populate() {
 	t.PostBackupCmdLineEdit.SetText(currentProfile.PostBackupCmd)
 
 	t.setNextBackupTime()
+
+	t.WifiListWidget.DisconnectItemChanged()
+	t.WifiListWidget.Clear()
+	ww := []models.KnownWifi{}
+	models.DB.Model(currentProfile).Related(&ww)
+	for _, wifi := range ww {
+		item := widgets.NewQListWidgetItem(t.WifiListWidget, 0)
+		item.SetText(wifi.SSID)
+		item.SetFlags(
+				core.Qt__ItemIsUserCheckable |
+				core.Qt__ItemIsEditable |
+				core.Qt__ItemIsEnabled |
+				core.Qt__ItemIsSelectable)
+		item.SetData(int(core.Qt__UserRole), core.NewQVariant1(wifi.ID))
+		if wifi.Allowed {
+			item.SetCheckState(core.Qt__Checked)
+		} else {
+			item.SetCheckState(core.Qt__Unchecked)
+		}
+		t.WifiListWidget.AddItem2(item)
+	}
+	t.WifiListWidget.ConnectItemChanged(func(item *widgets.QListWidgetItem) {
+		wifiToChange := models.KnownWifi{}
+		models.DB.First(&wifiToChange, item.Data(int(core.Qt__UserRole)).ToInt(nil))
+		wifiToChange.Allowed = item.CheckState() == core.Qt__Checked
+		models.DB.Save(&wifiToChange)
+	})
 }
 
 func (t *ScheduleTab) setNextBackupTime() {
