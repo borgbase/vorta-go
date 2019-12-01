@@ -3,7 +3,6 @@ package borg
 import (
 	"time"
 	"vorta/models"
-	"vorta/utils"
 )
 
 type ListRepoRun struct {
@@ -28,7 +27,7 @@ func NewListRepoRun(profile *models.Profile) (*ListRepoRun, error) {
 }
 
 func (r *ListRepoRun) ProcessResult() {
-	utils.Log.Info(r.Result)
+	archiveIDs := map[string]struct{}{}
 	for i, _ := range r.Result.GetPath("archives").MustArray(){
 		jsArchive := r.Result.Get("archives").GetIndex(i)
 		newArchive := models.Archive{}
@@ -37,10 +36,18 @@ func (r *ListRepoRun) ProcessResult() {
 		newArchive.CreatedAt, _ = time.Parse(time.RFC3339Nano, jsArchive.Get("time").MustString())
 		newArchive.RepoID = r.Repo.ID
 
-		var existingArchives int
-		models.DB.Where("snapshot_id = ?", newArchive.ArchiveID).Find(&models.Archive{}).Count(&existingArchives)
-		if existingArchives == 0 {
-			models.DB.Create(&newArchive)
+		models.DB.FirstOrCreate(&newArchive, models.Archive{ArchiveID: newArchive.ArchiveID})
+
+		// build list of archives to remove deleted ones later
+		archiveIDs[newArchive.ArchiveID] = struct{}{}
+		}
+
+	// Remove entries for archives no found in the repo
+	aa := []models.Archive{}
+	models.DB.Model(r.Repo).Related(&aa)
+	for _, a := range aa {
+		if _, ok := archiveIDs[a.ArchiveID]; !ok {
+			models.DB.Delete(&a)
 		}
 	}
 }

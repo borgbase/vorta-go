@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"github.com/therecipe/qt/widgets"
 	"io/ioutil"
 	"os"
 	"strconv"
@@ -20,4 +21,10 @@ func WritePidFile(pidFile string) error {
 		}
 	}
 	return ioutil.WriteFile(pidFile, []byte(fmt.Sprintf("%d", os.Getpid())), 0664)
+}
+
+func ShowDialog(message, title string, parent widgets.QWidget_ITF) {
+	c := widgets.NewQDialog(parent, 0) //<- the parent is set here
+	c.SetWindowTitle(title)
+	c.Show()
 }

@@ -50,13 +50,17 @@ func NewCreateRun(profile *models.Profile) (*CreateRun, error) {
 		utils.Log.Infof("Writing exclude file to %v", tmpFile.Name())
 	}
 
-	// TODO: implement exclude-if-present
-	//if profile.exclude_if_present is not None:
-	//for f in profile.exclude_if_present.split('\n'):
-	//if f.strip():
-	//cmd.extend(['--exclude-if-present', f.strip()])
+	// Append exclude-if-present patterns
+	if r.Profile.ExcludeIfPresent.Valid && len(r.Profile.ExcludeIfPresent.String) > 3 {
+		for _, e := range strings.Split(r.Profile.ExcludeIfPresent.String, "\n") {
+			trimmed := strings.TrimSpace(e)
+			if len(trimmed) > 3 {
+				r.SubCommandArgs = append(r.SubCommandArgs, "--exclude-if-present", trimmed)
+			}
+		}
+	}
 
-	newArchiveName := r.Profile.FormatArchiveName()
+	newArchiveName := r.Profile.FormatArchiveName(r.Profile.NewArchiveName)
 	r.SubCommandArgs = append(r.SubCommandArgs, r.Repo.Url+"::"+newArchiveName)
 
 	ss := []models.SourceDir{}

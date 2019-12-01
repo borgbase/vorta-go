@@ -448,6 +448,9 @@ font-weight: bold;
            <property name="styleSheet">
             <string notr="true">color: grey</string>
            </property>
+           <property name="text">
+            <string>Available variables: {hostname}, {profile_id}, {profile_slug}, {now}, {utc_now}, {user}</string>
+           </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
            </property>

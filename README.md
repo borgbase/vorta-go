@@ -2,7 +2,7 @@
 
 An implementation of [Vorta](https://github.com/borgbase/vorta) in Golang to improve deployment and packaging.
 
-Work in progress and NOT functional. Use the [Python version](https://github.com/borgbase/vorta) if you need something that works.
+Functional, but still missing some features. Use the [Python version](https://github.com/borgbase/vorta) if you need something that works.
 
 ## Progress
 
@@ -17,7 +17,7 @@ Borg Commands:
 - [ ] `diff`
 - [ ] `list-archive`
 - [x] `list-repo`
-- [ ] `prune`
+- [x] `prune`
 - [ ] `umount` and mount status
 - [x] `version`
 
@@ -31,11 +31,11 @@ Backend Functionality
 - [ ] [Tests](https://github.com/therecipe/examples/tree/master/test/widgets)
 - [x] Read list of WiFis
 - [ ] Check Wifi before scheduled backup
-- [ ] Password fallback to database
+- [ ] ~~Password fallback to database~~
 - [ ] Translations
 - [x] Notifications from scheduler
-- [ ] Settings functionality
-- [ ] Offer to install Borg CLI
+- [ ] Settings an related functionality (icon color, etc)
+- [ ] [Sparkle updates for macOS](https://github.com/therecipe/qt/issues/743#issuecomment-444689169)
 
 Packaging (via Docker)
 - [x] macOS

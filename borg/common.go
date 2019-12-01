@@ -122,15 +122,20 @@ func (r *BorgRun) Run() error {
 	}
 	AppEventChan <- utils.VEvent{Topic: "StatusUpdate", Message: "Started Command"}
 
-	err = cmd.Wait()
+	exitCode := 0
+	if err := cmd.Wait(); err != nil {
+		if exitError, ok := err.(*exec.ExitError); ok {
+			exitCode = exitError.ExitCode()
+		}
+	}
 	borgProcessSlot.Release(1)
+	AppEventChan <- utils.VEvent{Topic: "BorgRunStop"}
 
-	if err != nil { // TODO: return code 1 may only mean missing files. https://golang.org/pkg/os/exec/#ExitError
+	if exitCode > 1 {
 		utils.Log.Error(err)
 		AppEventChan <- utils.VEvent{Topic: "StatusUpdate", Message: "Borg finished with errors."}
 		return err
 	}
-	AppEventChan <- utils.VEvent{Topic: "BorgRunStop"}
 
 	// Try to parse json stdout
 	stdOutResult := stdOutBuf.Bytes()

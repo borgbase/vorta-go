@@ -15,8 +15,8 @@ func NewProfile(name string) *Profile {
 	profile.Name = name
 	profile.AddedAt = time.Now()
 	profile.Compression = "zstd,3"
-	profile.ExcludePatterns = sql.NullString{String: "*/.DS_Store", Valid:true}
-	profile.ExcludeIfPresent = sql.NullString{String: ".nobackup", Valid:true}
+	profile.ExcludePatterns = sql.NullString{String: "*/.DS_Store", Valid: true}
+	profile.ExcludeIfPresent = sql.NullString{String: ".nobackup", Valid: true}
 	profile.ScheduleMode = "off"
 	profile.ScheduleIntervalHours = 1
 	profile.ScheduleIntervalMinutes = 24
@@ -29,7 +29,7 @@ func NewProfile(name string) *Profile {
 	profile.PruneDay = 7
 	profile.PruneWeek = 4
 	profile.PruneMonth = 6
-	profile.PruneKeepWithin = sql.NullString{String: "", Valid:  true}
+	profile.PruneKeepWithin = sql.NullString{String: "", Valid: true}
 	profile.NewArchiveName = "{hostname}__{profile_slug}-{now}"
 	profile.PrunePrefix = "{hostname}-{profile_slug}-"
 	profile.PreBackupCmd = ""
@@ -71,7 +71,7 @@ type Profile struct {
 	PostBackupCmd  string      `gorm:"column:post_backup_cmd;type:varchar(255);not null"`
 	SourceDirs     []SourceDir `gorm:"foreignkey:ProfileId"`
 
-	KnownWifis		[]KnownWifi	`gorm:"foreignkey:ProfileID"`
+	KnownWifis []KnownWifi `gorm:"foreignkey:ProfileID"`
 }
 
 func (Profile) TableName() string {
@@ -82,7 +82,7 @@ func (p *Profile) Slug() string {
 	return slug.Make(p.Name)
 }
 
-func (p *Profile) FormatArchiveName() string {
+func (p *Profile) FormatArchiveName(archiveNameTemplate string) string {
 	// Time formatting: https://stackoverflow.com/a/20234207/3983708
 	// TODO: fully support time formatting?
 	timeFormat := "2006-01-02T15:04:05"
@@ -99,8 +99,8 @@ func (p *Profile) FormatArchiveName() string {
 	)
 
 	// Fallback if no archive name is set.
-	if p.NewArchiveName != "" {
-		return r.Replace(p.NewArchiveName)
+	if archiveNameTemplate != "" {
+		return r.Replace(archiveNameTemplate)
 	} else {
 		return time.Now().Format(timeFormat)
 	}

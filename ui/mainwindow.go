@@ -183,9 +183,11 @@ func (w *MainWindow) RunUIEventHandler(appChan chan utils.VEvent) {
 		case "BorgRunStart":
 			w.CreateStartBtn.SetDisabled(true)
 			w.CancelButton.SetDisabled(false)
+			Tabs.ArchiveTab.ToggleButtons(true)
 		case "BorgRunStop":
 			w.CreateStartBtn.SetDisabled(false)
 			w.CancelButton.SetDisabled(true)
+			Tabs.ArchiveTab.ToggleButtons(false)
 		default:
 			utils.Log.Info("Unhandled UI Channel Event")
 		}
